@@ -1,0 +1,7 @@
+__pycache__/
+*.pt
+*.ckpt
+data/
+results/
+.venv/
+.env
