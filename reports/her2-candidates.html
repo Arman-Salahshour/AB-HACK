@@ -1,0 +1,337 @@
+<title>HER2 Candidate Shortlist</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+  /* Layout: a lab readout — verdict strip, ranked candidate rows, then the caveats that qualify them. */
+  :root {
+    --bg: #f5f6f7;
+    --surface: #ffffff;
+    --surface-2: #eceef0;
+    --ink: #14181b;
+    --ink-2: #4a545c;
+    --ink-3: #78848d;
+    --rule: #d8dcdf;
+    --accent: #0f766e;
+    --accent-soft: #d6ebe8;
+    --warn: #9a5b06;
+    --warn-soft: #fbeedd;
+    --bad: #9b2c2c;
+
+    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e1113;
+      --surface: #171b1e;
+      --surface-2: #1f2529;
+      --ink: #e8ecee;
+      --ink-2: #a9b4bb;
+      --ink-3: #78858d;
+      --rule: #2b3236;
+      --accent: #5eead4;
+      --accent-soft: #10302c;
+      --warn: #e0a152;
+      --warn-soft: #2e2415;
+      --bad: #f08a8a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e1113;
+    --surface: #171b1e;
+    --surface-2: #1f2529;
+    --ink: #e8ecee;
+    --ink-2: #a9b4bb;
+    --ink-3: #78858d;
+    --rule: #2b3236;
+    --accent: #5eead4;
+    --accent-soft: #10302c;
+    --warn: #e0a152;
+    --warn-soft: #2e2415;
+    --bad: #f08a8a;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding-block: 40px 72px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  h1, h2, h3 { text-wrap: balance; margin: 0; letter-spacing: -0.015em; }
+  h1 { font-size: clamp(28px, 5vw, 40px); font-weight: 700; line-height: 1.1; }
+  h2 { font-size: 20px; font-weight: 600; }
+  h3 { font-size: 15px; font-weight: 600; }
+  p { margin: 0; }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .lede { color: var(--ink-2); max-width: 64ch; margin-top: 12px; }
+  header { border-bottom: 1px solid var(--rule); padding-bottom: 28px; }
+  section { margin-top: 44px; display: flex; flex-direction: column; gap: 16px; }
+  .section-head { display: flex; flex-direction: column; gap: 4px; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* funnel */
+  .funnel { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .step {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 6px;
+    padding: 14px 16px; display: flex; flex-direction: column; gap: 2px;
+  }
+  .step .v { font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .step .k { font-size: 12px; color: var(--ink-3); }
+  .step.final { border-color: var(--accent); background: var(--accent-soft); }
+  .step.final .v { color: var(--accent); }
+
+  /* candidates */
+  .cards { display: flex; flex-direction: column; gap: 10px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 8px;
+    padding: 16px 18px; display: flex; flex-direction: column; gap: 12px;
+  }
+  .card.tier1 { border-left: 3px solid var(--accent); }
+  .card.tier3 { border-left: 3px solid var(--warn); }
+  .card-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 14px; }
+  .rank {
+    font-family: var(--mono); font-size: 12px; font-weight: 600;
+    color: var(--ink-3); min-width: 2.2em;
+  }
+  .did { font-family: var(--mono); font-size: 14px; font-weight: 600; }
+  .loop {
+    font-family: var(--mono); font-size: 15px; font-weight: 600;
+    background: var(--surface-2); padding: 2px 8px; border-radius: 4px; letter-spacing: 0.02em;
+  }
+  .loop b { color: var(--accent); font-weight: 600; }
+  .tag {
+    font-size: 11px; font-family: var(--mono); padding: 2px 7px; border-radius: 3px;
+    background: var(--surface-2); color: var(--ink-2); white-space: nowrap;
+  }
+  .tag.good { background: var(--accent-soft); color: var(--accent); }
+  .tag.warn { background: var(--warn-soft); color: var(--warn); }
+  .metrics {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+    gap: 10px; border-top: 1px solid var(--rule); padding-top: 12px;
+  }
+  .metric { display: flex; flex-direction: column; gap: 1px; }
+  .metric .mv { font-family: var(--mono); font-size: 15px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .metric .mk { font-size: 10.5px; color: var(--ink-3); letter-spacing: 0.02em; }
+  .metric .mv.hi { color: var(--accent); }
+  .metric .mv.lo { color: var(--warn); }
+  details.seq { border-top: 1px solid var(--rule); padding-top: 10px; }
+  details.seq summary {
+    cursor: pointer; font-size: 12px; color: var(--ink-3); list-style: none;
+    display: flex; align-items: center; gap: 6px;
+  }
+  details.seq summary::-webkit-details-marker { display: none; }
+  details.seq summary::before { content: "▸"; font-size: 10px; }
+  details.seq[open] summary::before { content: "▾"; }
+  .seqbox {
+    font-family: var(--mono); font-size: 12px; line-height: 1.75; word-break: break-all;
+    background: var(--surface-2); border-radius: 5px; padding: 10px 12px; margin-top: 8px;
+    color: var(--ink-2); user-select: all;
+  }
+  .seqbox b { color: var(--accent); font-weight: 600; }
+  .seqlabel { font-size: 10.5px; color: var(--ink-3); font-family: var(--mono); margin-top: 8px; }
+
+  /* notes */
+  .note {
+    border: 1px solid var(--rule); border-left: 3px solid var(--warn);
+    background: var(--surface); border-radius: 6px; padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .note.dead { border-left-color: var(--bad); }
+  .note p { color: var(--ink-2); font-size: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .scroll { overflow-x: auto; }
+  th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--rule); }
+  th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); font-weight: 500; }
+  td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--rule); color: var(--ink-3); font-size: 12.5px; }
+  code { font-family: var(--mono); font-size: 0.92em; background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
+  a { color: var(--accent); }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Oslo Antibodies × AI · optimisation track</p>
+    <h1>HER2 Candidate Shortlist</h1>
+    <p class="lede">
+      Trastuzumab variants with a redesigned CDRH3, generated with the HER2-finetuned
+      RFD4-Proteina weights, refolded with Boltz-2 and checked against every
+      <code>abguard</code> filter. Ranked for submission; all seventeen below are eligible.
+    </p>
+  </header>
+
+  <section>
+    <div class="section-head">
+      <h2>From 100 designs to a shortlist</h2>
+      <p class="eyebrow">seed 11 · her2-novel-2026-11-09</p>
+    </div>
+    <div class="funnel" id="funnel"></div>
+    <p style="color:var(--ink-2);font-size:14px;max-width:70ch">
+      The novelty gate is the narrow one: a CDRH3 must differ by at least three
+      positions from trastuzumab <em>and</em> from all 525,063 sequences in the provided
+      FACS and SPR tables — plus, as we found, from patent and PDB loops in
+      <code>abguard</code>'s own 610k reference.
+    </p>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Ranked candidates</h2>
+      <p class="eyebrow">ranked on refold agreement, interface confidence and predicted binding</p>
+    </div>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>What qualifies these numbers</h2></div>
+
+    <div class="note">
+      <h3>No design is predicted to beat trastuzumab on affinity</h3>
+      <p>
+        Trastuzumab measures K<sub>D</sub> 0.029–0.178 nM in the provided SPR table. Our
+        regressor predicts nothing below 1 nM across all 66 novelty-passing designs; the best
+        is 5.9 nM. That is not the model clipping — it predicts as low as 0.05 nM on its own
+        training data. The novelty gate forces us at least three mutations away from every
+        measured variant, into sequence space that is on average worse. S-tier (winning all
+        three axes) is therefore unlikely; A-tier — epitope preserved plus thermostability —
+        is the realistic target.
+      </p>
+    </div>
+
+    <div class="note">
+      <h3>The scorer declined to judge, so the threshold is ours</h3>
+      <p>
+        <code>refold_metrics.csv</code> returned an empty <code>pass</code> column, not
+        <code>True</code>: target-aligned RMSD is undefined when fewer than three target atoms
+        are fixed in absolute coordinates. These designs were not approved — they were not
+        disqualified. The ranking uses the metrics the documentation recommends in that case
+        (<code>min_ipae</code>, <code>iptm</code>, <code>binder_plddt</code>) plus backbone RMSD.
+      </p>
+    </div>
+
+    <div class="note dead">
+      <h3>The de novo track was tested and dropped</h3>
+      <p>
+        200 de novo VHH nanobodies were designed against the same epitope. Of 40 validated,
+        <strong>zero</strong> survived: binder pLDDT ~0.92 (they fold well) but 15–51 Å from the
+        designed pose, and AF2-IG independently returned ipTM 0.11–0.34 against a 0.5 threshold.
+        Well-formed proteins with no interface. Adaptyv's EGFR competition agrees with the
+        direction: optimised binders hit 18–28 %, the best de novo method 9 %.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>How a design was judged</h2>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>Metric</th><th>Question it answers</th><th>Good</th><th>Source</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="n">min_ipae</td><td>Is the interface geometry confident?</td><td class="n">lower; &lt; 0.5</td><td>Boltz-2 refold</td></tr>
+          <tr><td class="n">iptm</td><td>Is the complex confident?</td><td class="n">&gt; 0.75</td><td>Boltz-2 refold</td></tr>
+          <tr><td class="n">RMSD</td><td>Does the sequence rebuild the designed structure?</td><td class="n">&lt; 1 Å</td><td>Boltz-2 refold</td></tr>
+          <tr><td class="n">P(high)</td><td>Does this loop bind HER2 at all?</td><td class="n">higher</td><td>FACS classifier, 524k variants, 0.91 acc.</td></tr>
+          <tr><td class="n">pred K<sub>D</sub></td><td>How tightly?</td><td class="n">lower</td><td>SPR regressor, 190 points, CV R² 0.56</td></tr>
+          <tr><td class="n">mutations</td><td>Far enough from everything known?</td><td class="n">≥ 3</td><td>abguard, 610k reference</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="color:var(--ink-2);font-size:14px;max-width:70ch">
+      Ranking puts refold agreement first. Two designs (D64, D10) have the best interface scores
+      but 9–14 Å RMSD: Boltz-2 is confident about an interface that is not the one we designed.
+      A confident prediction of a different structure is weaker evidence than a confident
+      prediction of ours, so they sit below the sub-ångström group.
+    </p>
+  </section>
+
+  <footer>
+    Generated from <code>designs/opt-s11-ranked-final.csv</code> · pipeline and method at
+    <a href="https://github.com/Arman-Salahshour/AB-HACK">github.com/Arman-Salahshour/AB-HACK</a> ·
+    CDRH3 shown as the 10-residue screen window; <code>abguard</code> compares the IMGT CDR3 with its
+    <span style="font-family:var(--mono)">SR…Y</span> flanks. Light chain is trastuzumab's, unchanged in every design.
+  </footer>
+</div>
+
+<script>
+  const ROWS = [{"id":"D53","cdrh3":"WTSSVGYAHD","imgt":"SRWTSSVGYAHDY","ipae":0.475,"iptm":0.777,"plddt":97.6,"rmsd":0.82,"phigh":0.78,"kd":22.2,"muts":6,"near":3,"vh":"EVQLVESGGGLVQPGGSLRLSCAASGFNIKDTYIHWVRQAPGKGLEWVARIYPTNGYTRYADSVKGRFTISADTSKNTAYLQMNSLRAEDTAVYYCSRWTSSVGYAHDYWGQGTLVTVSS"},{"id":"D50","cdrh3":"WASSYYYYFD","imgt":"SRWASSYYYYFDY","ipae":0.434,"iptm":0.794,"plddt":97.2,"rmsd":0.89,"phigh":0.454,"kd":5.9,"muts":7,"near":3,"vh":"EVQLVESGGGLVQPGGSLRLSCAASGFNIKDTYIHWVRQAPGKGLEWVARIYPTNGYTRYADSVKGRFTISADTSKNTAYLQMNSLRAEDTAVYYCSRWASSYYYYFDYWGQGTLVTVSS"},{"id":"D55","cdrh3":"YASLYDYYFD","imgt":"SRYASLYDYYFDY","ipae":0.493,"iptm":0.792,"plddt":97.4,"rmsd":0.93,"phigh":0.538,"kd":87.7,"muts":8,"near":3,"vh":"EVQLVESGGGLVQPGGSLRLSCAASGFNIKDTYIHWVRQAPGKGLEWVARIYPTNGYTRYADSVKGRFTISADTSKNTAYLQMNSLRAEDTAVYYCSRYASLYDYYFDYWGQGTLVTVSS"},{"id":"D4","cdrh3":"WHSLYYYYFD","imgt":"SRWHSLYYYYFDY","ipae":0.388,"iptm":0.837,"plddt":95.9,"rmsd":0.81,"phigh":0.121,"kd":13.9,"muts":7,"near":3,"vh":"EVQLVESGGGLVQPGGSLRLSCAASGFNIKDTYIHWVRQAPGKGLEWVARIYPTNGYTRYADSVKGRFTISADTSKNTAYLQMNSLRAEDTAVYYCSRWHSLYYYYFDYWGQGTLVTVSS"},{"id":"D20","cdrh3":"STSAYDYAFD","imgt":"SRSTSAYDYAFDY","ipae":0.376,"iptm":0.794,"plddt":96.4,"rmsd":0.82,"phigh":0.169,"kd":180.9,"muts":7,"near":3,"vh":"EVQLVESGGGLVQPGGSLRLSCAASGFNIKDTYIHWVRQAPGKGLEWVARIYPTNGYTRYADSVKGRFTISADTSKNTAYLQMNSLRAEDTAVYYCSRSTSAYDYAFDYWGQGTLVTVSS"},{"id":"D64","cdrh3":"YYSTSMYYFD","imgt":"SRYYSTSMYYFDY","ipae":0.33,"iptm":0.883,"plddt":94.6,"rmsd":8.82,"phigh":0.661,"kd":41.2,"muts":8,"near":3,"vh":"EVQLVESGGGLVQPGGSLRLSCAASGFNIKDTYIHWVRQAPGKGLEWVARIYPTNGYTRYADSVKGRFTISADTSKNTAYLQMNSLRAEDTAVYYCSRYYSTSMYYFDYWGQGTLVTVSS"},{"id":"D10","cdrh3":"DLSLADRAFD","imgt":"SRDLSLADRAFDY","ipae":0.378,"iptm":0.868,"plddt":96.5,"rmsd":14.17,"phigh":0.66,"kd":210.5,"muts":8,"near":4,"vh":"EVQLVESGGGLVQPGGSLRLSCAASGFNIKDTYIHWVRQAPGKGLEWVARIYPTNGYTRYADSVKGRFTISADTSKNTAYLQMNSLRAEDTAVYYCSRDLSLADRAFDYWGQGTLVTVSS"},{"id":"D23","cdrh3":"DLLPNHAVFD","imgt":"SRDLLPNHAVFDY","ipae":0.414,"iptm":0.805,"plddt":96.6,"rmsd":4.33,"phigh":0.045,"kd":1097.2,"muts":9,"near":4,"vh":"EVQLVESGGGLVQPGGSLRLSCAASGFNIKDTYIHWVRQAPGKGLEWVARIYPTNGYTRYADSVKGRFTISADTSKNTAYLQMNSLRAEDTAVYYCSRDLLPNHAVFDYWGQGTLVTVSS"},{"id":"D0","cdrh3":"SLSIYDYSFD","imgt":"SRSLSIYDYSFDY","ipae":0.423,"iptm":0.749,"plddt":97.4,"rmsd":11.74,"phigh":0.395,"kd":227.0,"muts":8,"near":3,"vh":"EVQLVESGGGLVQPGGSLRLSCAASGFNIKDTYIHWVRQAPGKGLEWVARIYPTNGYTRYADSVKGRFTISADTSKNTAYLQMNSLRAEDTAVYYCSRSLSIYDYSFDYWGQGTLVTVSS"},{"id":"D83","cdrh3":"DMRDYPGYFD","imgt":"SRDMRDYPGYFDY","ipae":0.424,"iptm":0.757,"plddt":96.8,"rmsd":20.27,"phigh":0.126,"kd":343.5,"muts":8,"near":5,"vh":"EVQLVESGGGLVQPGGSLRLSCAASGFNIKDTYIHWVRQAPGKGLEWVARIYPTNGYTRYADSVKGRFTISADTSKNTAYLQMNSLRAEDTAVYYCSRDMRDYPGYFDYWGQGTLVTVSS"},{"id":"D41","cdrh3":"SLLLNHDVFD","imgt":"SRSLLLNHDVFDY","ipae":0.437,"iptm":0.79,"plddt":96.9,"rmsd":3.6,"phigh":0.042,"kd":501.7,"muts":9,"near":4,"vh":"EVQLVESGGGLVQPGGSLRLSCAASGFNIKDTYIHWVRQAPGKGLEWVARIYPTNGYTRYADSVKGRFTISADTSKNTAYLQMNSLRAEDTAVYYCSRSLLLNHDVFDYWGQGTLVTVSS"},{"id":"D81","cdrh3":"DYSTYSYAFD","imgt":"SRDYSTYSYAFDY","ipae":0.444,"iptm":0.724,"plddt":97.3,"rmsd":8.65,"phigh":0.13,"kd":110.2,"muts":7,"near":4,"vh":"EVQLVESGGGLVQPGGSLRLSCAASGFNIKDTYIHWVRQAPGKGLEWVARIYPTNGYTRYADSVKGRFTISADTSKNTAYLQMNSLRAEDTAVYYCSRDYSTYSYAFDYWGQGTLVTVSS"},{"id":"D80","cdrh3":"DLTLSTSDFD","imgt":"SRDLTLSTSDFDY","ipae":0.458,"iptm":0.772,"plddt":96.7,"rmsd":6.99,"phigh":0.114,"kd":307.9,"muts":9,"near":4,"vh":"EVQLVESGGGLVQPGGSLRLSCAASGFNIKDTYIHWVRQAPGKGLEWVARIYPTNGYTRYADSVKGRFTISADTSKNTAYLQMNSLRAEDTAVYYCSRDLTLSTSDFDYWGQGTLVTVSS"},{"id":"D9","cdrh3":"DRSLYYYEFD","imgt":"SRDRSLYYYEFDY","ipae":0.463,"iptm":0.757,"plddt":97.5,"rmsd":23.19,"phigh":0.158,"kd":140.0,"muts":8,"near":4,"vh":"EVQLVESGGGLVQPGGSLRLSCAASGFNIKDTYIHWVRQAPGKGLEWVARIYPTNGYTRYADSVKGRFTISADTSKNTAYLQMNSLRAEDTAVYYCSRDRSLYYYEFDYWGQGTLVTVSS"},{"id":"D21","cdrh3":"YVPFSVSAFD","imgt":"SRYVPFSVSAFDY","ipae":0.482,"iptm":0.696,"plddt":96.6,"rmsd":20.54,"phigh":0.758,"kd":278.0,"muts":8,"near":3,"vh":"EVQLVESGGGLVQPGGSLRLSCAASGFNIKDTYIHWVRQAPGKGLEWVARIYPTNGYTRYADSVKGRFTISADTSKNTAYLQMNSLRAEDTAVYYCSRYVPFSVSAFDYWGQGTLVTVSS"},{"id":"D68","cdrh3":"WKSLSEYYFD","imgt":"SRWKSLSEYYFDY","ipae":0.523,"iptm":0.747,"plddt":96.8,"rmsd":0.97,"phigh":0.291,"kd":29.3,"muts":7,"near":3,"vh":"EVQLVESGGGLVQPGGSLRLSCAASGFNIKDTYIHWVRQAPGKGLEWVARIYPTNGYTRYADSVKGRFTISADTSKNTAYLQMNSLRAEDTAVYYCSRWKSLSEYYFDYWGQGTLVTVSS"},{"id":"D77","cdrh3":"SLSLSSYAYD","imgt":"SRSLSLSSYAYDY","ipae":0.53,"iptm":0.671,"plddt":97.2,"rmsd":7.82,"phigh":0.136,"kd":52.5,"muts":7,"near":3,"vh":"EVQLVESGGGLVQPGGSLRLSCAASGFNIKDTYIHWVRQAPGKGLEWVARIYPTNGYTRYADSVKGRFTISADTSKNTAYLQMNSLRAEDTAVYYCSRSLSLSSYAYDYWGQGTLVTVSS"}];
+  const FUNNEL = [
+    { v: 100, k: "designs generated" },
+    { v: 94, k: "unique CDRH3" },
+    { v: 61, k: "pass every abguard filter" },
+    { v: 17, k: "refolded with Boltz-2" },
+    { v: 5, k: "rebuild design < 1 Å", final: true },
+  ];
+
+  document.getElementById("funnel").innerHTML = FUNNEL.map(s => `
+    <div class="step${s.final ? " final" : ""}">
+      <span class="v">${s.v}</span>
+      <span class="k">${s.k}</span>
+    </div>`).join("");
+
+  const TZ = "WGGDGFYAMD";
+  const diff = (loop) => [...loop].map((c, i) => c === TZ[i] ? c : `<b>${c}</b>`).join("");
+
+  const vhSplit = (vh, loop) => {
+    const i = vh.indexOf(loop);
+    if (i < 0) return vh;
+    return `${vh.slice(0, i)}<b>${loop}</b>${vh.slice(i + loop.length)}`;
+  };
+
+  document.getElementById("cards").innerHTML = ROWS.map((r, n) => {
+    const reproduced = r.rmsd < 1.0;
+    const tier = reproduced ? "tier1" : (r.rmsd > 8 ? "tier3" : "");
+    const tags = [];
+    if (reproduced) tags.push(`<span class="tag good">rebuilds design</span>`);
+    else if (r.rmsd > 8) tags.push(`<span class="tag warn">different pose</span>`);
+    if (r.phigh >= 0.5) tags.push(`<span class="tag good">P(high) ${r.phigh}</span>`);
+    tags.push(`<span class="tag">${r.muts} muts from trastuzumab</span>`);
+    tags.push(`<span class="tag">nearest known +${r.near}</span>`);
+
+    return `
+    <article class="card ${tier}">
+      <div class="card-top">
+        <span class="rank">${String(n + 1).padStart(2, "0")}</span>
+        <span class="did">${r.id}</span>
+        <span class="loop">${diff(r.cdrh3)}</span>
+        ${tags.join("")}
+      </div>
+      <div class="metrics">
+        <div class="metric"><span class="mv ${r.ipae < 0.45 ? "hi" : ""}">${r.ipae.toFixed(3)}</span><span class="mk">min_ipae</span></div>
+        <div class="metric"><span class="mv ${r.iptm > 0.8 ? "hi" : ""}">${r.iptm.toFixed(3)}</span><span class="mk">iptm</span></div>
+        <div class="metric"><span class="mv ${reproduced ? "hi" : "lo"}">${r.rmsd.toFixed(2)} Å</span><span class="mk">backbone RMSD</span></div>
+        <div class="metric"><span class="mv">${r.plddt.toFixed(1)}</span><span class="mk">binder pLDDT</span></div>
+        <div class="metric"><span class="mv">${r.phigh.toFixed(2)}</span><span class="mk">P(high binder)</span></div>
+        <div class="metric"><span class="mv">${r.kd} nM</span><span class="mk">predicted K<sub>D</sub></span></div>
+      </div>
+      <details class="seq">
+        <summary>heavy chain · ${r.vh.length} aa · IMGT CDR3 ${r.imgt}</summary>
+        <div class="seqlabel">VH (CDRH3 highlighted)</div>
+        <div class="seqbox">${vhSplit(r.vh, r.cdrh3)}</div>
+      </details>
+    </article>`;
+  }).join("");
+</script>
