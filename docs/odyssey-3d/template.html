@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Odyssey 3D Presentation</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#070b12; --fg:#e8eef2; --muted:#9db0bc; --line:rgba(160,200,220,.22);
+  --glass:rgba(12,22,34,.62); --accent:#4fb3ae; --opt:#3aa0ff; --dn:#eb6834; --warn:#eda100;
+  --sans:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--fg);font-family:var(--sans)}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block}
+#stage{position:fixed;inset:0;perspective:1400px;perspective-origin:50% 45%;pointer-events:none}
+.slide{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  padding:56px max(24px,6vw) 84px;opacity:0;visibility:hidden;
+  transform:translate3d(0,0,-900px) rotateY(38deg);
+  transition:transform .95s cubic-bezier(.2,.8,.2,1),opacity .7s ease,visibility 0s .95s;
+  transform-style:preserve-3d;
+}
+.slide.prev{transform:translate3d(-60%,0,-700px) rotateY(-42deg)}
+.slide.active{opacity:1;visibility:visible;transform:none;transition-delay:0s;pointer-events:auto}
+.slide.active.scatter{pointer-events:none}
+.panel{
+  background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid var(--line);border-radius:14px;padding:clamp(20px,3vw,40px);
+  max-width:1100px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.5);
+  transform-style:preserve-3d;
+}
+.eyebrow{font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+h1,h2{margin:0 0 14px;letter-spacing:-.02em;text-wrap:balance;line-height:1.1}
+h1{font-size:clamp(34px,6vw,72px);font-weight:600}
+h2{font-size:clamp(26px,3.6vw,44px);font-weight:600}
+p{margin:0 0 12px;line-height:1.55;color:var(--muted);max-width:68ch}
+.lede{font-size:clamp(16px,1.6vw,21px);color:var(--fg)}
+.lift{transform:translateZ(40px)}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g5{grid-template-columns:repeat(5,1fr)}
+.card{
+  background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:10px;padding:16px;
+  transition:transform .25s ease,border-color .25s;transform-style:preserve-3d;
+}
+.card:hover{transform:translateZ(30px) rotateX(4deg) rotateY(-4deg);border-color:var(--accent)}
+.card b{display:block;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;font-family:var(--mono)}
+.card p{font-size:14px;margin:0}
+.big{font:600 clamp(26px,3vw,38px) var(--sans);color:var(--fg)}
+.mono{font-family:var(--mono)}
+.row{display:flex;gap:28px;align-items:center}
+.row>*{flex:1;min-width:0}
+img.fig{width:100%;border-radius:10px;border:1px solid var(--line);display:block;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.title-ship{animation:bob 6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-10px) rotateZ(-.6deg)}}
+.chip{display:inline-block;font:500 12px var(--mono);padding:3px 9px;border-radius:99px;border:1px solid var(--line);color:var(--muted);margin-right:6px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{font:500 11px var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--accent)}
+td.n,th.n{text-align:right;font-family:var(--mono)}
+.crew{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.crew span{padding:6px 12px;border:1px solid var(--line);border-radius:99px;font-size:14px;background:rgba(255,255,255,.04)}
+/* scatter slide */
+.side{max-width:420px;margin-right:auto}
+#tip{position:fixed;pointer-events:none;background:rgba(8,14,22,.92);border:1px solid var(--accent);border-radius:8px;padding:8px 10px;font:12px var(--mono);display:none;z-index:5;max-width:260px}
+.hint{font:12px var(--mono);color:var(--muted);margin-top:10px}
+/* nav */
+#nav{position:fixed;left:0;right:0;bottom:18px;display:flex;justify-content:center;align-items:center;gap:10px;z-index:4}
+#nav button.dotb{width:10px;height:10px;border-radius:50%;border:1px solid var(--muted);background:transparent;padding:0;cursor:pointer;transition:all .3s}
+#nav button.dotb.on{background:var(--accent);border-color:var(--accent);width:28px;border-radius:6px}
+.arrow{background:var(--glass);border:1px solid var(--line);color:var(--fg);width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:18px}
+.arrow:hover{border-color:var(--accent)}
+#count{position:fixed;top:16px;right:20px;font:12px var(--mono);color:var(--muted);z-index:4}
+#brand{position:fixed;top:16px;left:20px;font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);z-index:4}
+@media(max-width:820px){.g2,.g3,.g5,.row{grid-template-columns:1fr;flex-direction:column}.slide{padding:48px 14px 80px;align-items:flex-start;overflow-y:auto}
+ .tbl{overflow-x:auto}}
+@media(prefers-reduced-motion:reduce){.slide{transition-duration:.01s}.title-ship{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="brand">Odyssey · Oslo Antibodies × AI 2026</div>
+<div id="count"></div>
+<div id="tip"></div>
+
+<div id="stage">
+
+<section class="slide" data-cam="0,0,40|0,0,0">
+  <div class="panel">
+    <div class="row">
+      <div class="lift">
+        <p class="eyebrow">Antibody AI Hackathon · Oslo 2026</p>
+        <h1>Odyssey</h1>
+        <p class="lede">Final ranking: 30 HER2 antibody designs. Rank 1 is the one to make first.</p>
+        <p class="hint">← → / space / swipe to fly · drag the scatter on slide 5</p>
+      </div>
+      <img class="fig title-ship" src="../assets/odyssey/ship.webp" alt="Ship">
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-cam="-6,2,0|0,0,-30">
+  <div class="panel">
+    <p class="eyebrow">I · Unmet need</p>
+    <h2>Strike the tumor, spare the heart</h2>
+    <div class="row">
+      <div class="lift">
+        <p class="lede">We target HER2 in the tumor microenvironment, not the HER2 the heart relies on.</p>
+        <p>The tumor is more acidic (≈ pH 6.5) than blood (7.4). A histidine gains a charge as pH falls, so a design can in principle hold on harder in the tumor.</p>
+        <div class="grid g2">
+          <div class="card"><b>Free histidine</b><p>pKa 6.0 → fraction-protonated gap 0.20</p></div>
+          <div class="card"><b>Lifted to pKa 7.0</b><p>gap 0.47 between 6.5 and 7.4</p></div>
+        </div>
+        <p class="hint">Predicted for every design — a prediction, not a measurement.</p>
+      </div>
+      <img class="fig" src="../assets/odyssey/cell_heart.webp" alt="Tumor and heart cells">
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-cam="6,-1,-60|0,0,-90">
+  <div class="panel">
+    <p class="eyebrow">II · Our voyage</p>
+    <h2>Pipeline</h2>
+    <div class="grid g5">
+      <div class="card"><b>1 Generate</b><p>225 unique optimisation designs (new CDRH3 on trastuzumab) and 220 de novo nanobodies.</p></div>
+      <div class="card"><b>2 Filter</b><p>139 pass novelty, 130 pass the pH gate; only designs with a structure refold go on (18 parents).</p></div>
+      <div class="card"><b>3 Cross-check</b><p>Boltz-2 interface error, then Mol-1 with no template: all 22 optimisation designs sit in trastuzumab's pose.</p></div>
+      <div class="card"><b>4 Rank</b><p>Binding models decide the order. pH and safety break ties; they never override.</p></div>
+      <div class="card"><b>5 Twin</b><p>Top 4 get a framework twin (VH S85N + R87T) linked to higher melting temperature.</p></div>
+    </div>
+    <div class="grid g2" style="margin-top:16px">
+      <div class="card"><b style="color:var(--opt)">Optimisation designs</b><p>Trastuzumab with one new CDRH3 loop. The four twins also carry two framework mutations.</p></div>
+      <div class="card"><b style="color:var(--dn)">De novo nanobodies</b><p>All three loops designed from scratch. No design passed an independent structure check.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-cam="-4,1,-120|0,0,-150">
+  <div class="panel">
+    <p class="eyebrow">III · Landfall</p>
+    <h2>Results</h2>
+    <div class="grid g3" style="margin-bottom:14px">
+      <div class="card"><div class="big">22</div><p>optimisation designs (18 parents + 4 twins)</p></div>
+      <div class="card"><div class="big" style="color:var(--dn)">8</div><p>de novo, placed last — no independent check found them credible</p></div>
+      <div class="card"><div class="big" style="color:var(--warn)">0</div><p>measured results. Affinity, thermostability and pH selectivity are all predictions.</p></div>
+    </div>
+    <p>Next: fly into the design space — each point is one ranked design.</p>
+  </div>
+</section>
+
+<section class="slide scatter" data-cam="0,2,-166|10,0,-190" data-scatter="1">
+  <div class="panel side" style="pointer-events:auto">
+    <p class="eyebrow">The design space</p>
+    <h2>22 designs, 3 axes</h2>
+    <p><b style="color:var(--fg)">X</b> predicted K<sub>D</sub> (log, right = weaker)<br>
+       <b style="color:var(--fg)">Y</b> binder probability<br>
+       <b style="color:var(--fg)">Z</b> Mol-1 pose error vs trastuzumab (Å)</p>
+    <p><span class="dot" style="background:var(--opt)"></span>optimisation &nbsp;<span class="dot" style="background:#7fe3d6"></span>framework twin &nbsp;<span class="dot" style="background:var(--dn)"></span>de novo (on the floor)</p>
+    <p>Best predicted K<sub>D</sub> ≈ 9 nM vs trastuzumab ≈ 0.2 nM — about 40× weaker. We do not expect to win on affinity.</p>
+    <p class="hint">Drag to rotate · hover a point · scroll disabled</p>
+  </div>
+</section>
+
+<section class="slide" data-cam="5,0,-210|0,0,-240">
+  <div class="panel">
+    <p class="eyebrow">The ranked designs</p>
+    <h2>Top six at a glance</h2>
+    <div class="tbl"><table id="toptbl"></table></div>
+    <p class="hint">Thermostability = loop-confidence proxy; safety = sequence proxy, not a toxicity prediction. Rows 2, 4, 6 are framework twins.</p>
+  </div>
+</section>
+
+<section class="slide" data-cam="-5,-1,-260|0,0,-290">
+  <div class="panel">
+    <p class="eyebrow">Honesty slide</p>
+    <h2>What is measured, and what is not</h2>
+    <div class="tbl"><table>
+      <tr><th>Question</th><th>What we have</th><th>How far to trust it</th></tr>
+      <tr><td>Affinity</td><td>Binder + K<sub>D</sub> models (525k measured variants); Boltz-2 interface error</td><td>Predictions only. Best ≈ 9 nM vs 0.2 nM.</td></tr>
+      <tr><td>Thermostability</td><td>Literature framework twins; loop-confidence proxy; thermal MD on trastuzumab only</td><td>No design simulated (MD stopped early). The twins are the real bet.</td></tr>
+      <tr><td>pH 6.5 vs 7.4</td><td>pKa-based prediction; two-pH MD on the reference</td><td>Unvalidated, noisy; MD gap within replica noise.</td></tr>
+      <tr><td>Safety</td><td>Sequence liabilities, hydrophobicity, charge</td><td>A proxy. Cardiac toxicity is target-mediated; every design on this epitope inherits it.</td></tr>
+      <tr><td>Structure</td><td>Boltz-2 (templated); Mol-1, OpenFold3 (no template)</td><td>Supports the binding mode, cannot tell good loops from bad.</td></tr>
+    </table></div>
+  </div>
+</section>
+
+<section class="slide" data-cam="0,3,-320|0,0,-350">
+  <div class="panel">
+    <div class="row">
+      <div class="lift">
+        <p class="eyebrow">IV · The crew and the journey ahead</p>
+        <h2>Next steps</h2>
+        <p>① Measure the top designs — binding and thermostability in the lab.<br>
+           ② Finish thermal and two-pH MD on our designs.<br>
+           ③ Test the pH idea directly: binding at 6.5 vs 7.4.<br>
+           ④ Add an energy estimate (MM/GBSA) to the ranking.</p>
+        <div class="crew">
+          <span>Amir Amanzadi</span><span>Arman Salahshour</span><span>Joel Benjamin Heim</span>
+          <span>Johanne Kloster Ellingsen</span><span>Paula Istvan</span><span>Tamjidmaa Khatanbaatar</span>
+        </div>
+        <p class="hint">Hand-in file: odyssey.csv (30 rows, with track column)</p>
+      </div>
+      <img class="fig" src="../assets/odyssey/crew.webp" alt="Crew">
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div id="nav">
+  <button class="arrow" id="prev" aria-label="Previous">←</button>
+  <span id="dots" style="display:flex;gap:8px;align-items:center"></span>
+  <button class="arrow" id="next" aria-label="Next">→</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const DATA = __DATA__;
+const slides=[...document.querySelectorAll('.slide')];
+let cur=0;
+
+/* ---------- top-six table ---------- */
+document.getElementById('toptbl').innerHTML =
+ '<tr><th>#</th><th>Design</th><th>CDRH3</th><th class="n">Binder p</th><th class="n">KD nM</th><th class="n">iPAE Å</th><th class="n">Pose Å</th><th class="n">pH sel.</th><th class="n">Loop gap</th></tr>'+
+ DATA.slice(0,6).map(r=>`<tr><td>${r.rank}</td><td>${r.name}</td><td class="mono">${r.cdr}</td><td class="n">${r.prob.toFixed(2)}</td><td class="n">${r.kd}</td><td class="n">${r.ipae.toFixed(2)}</td><td class="n">${r.pose}</td><td class="n">${r.ph>0?'+':''}${r.ph.toFixed(2)}</td><td class="n">${r.gap}</td></tr>`).join('');
+
+/* ---------- three.js ---------- */
+const canvas=document.getElementById('gl');
+let renderer, scene, camera, glOK=true;
+try{
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
+}catch(e){glOK=false}
+const camPos=new THREE.Vector3(0,0,40), camLook=new THREE.Vector3(0,0,0);
+const tgtPos=camPos.clone(), tgtLook=camLook.clone();
+let scatter, pickables=[], ocean, stars;
+if(glOK){
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  scene=new THREE.Scene(); scene.background=new THREE.Color(0x070b12);
+  scene.fog=new THREE.FogExp2(0x070b12,.0042);
+  camera=new THREE.PerspectiveCamera(60,1,.1,900);
+
+  // starfield along the flight path
+  const N=2600, p=new Float32Array(N*3), c=new Float32Array(N*3);
+  for(let i=0;i<N;i++){
+    p[i*3]=(Math.random()-.5)*160; p[i*3+1]=(Math.random()-.5)*90; p[i*3+2]=60-Math.random()*460;
+    const k=Math.random(), col=new THREE.Color().setHSL(.5+.1*k,.6,.55+.3*Math.random());
+    c.set([col.r,col.g,col.b],i*3);
+  }
+  const sg=new THREE.BufferGeometry();
+  sg.setAttribute('position',new THREE.BufferAttribute(p,3)); sg.setAttribute('color',new THREE.BufferAttribute(c,3));
+  stars=new THREE.Points(sg,new THREE.PointsMaterial({size:.55,vertexColors:true,transparent:true,opacity:.9,sizeAttenuation:true}));
+  scene.add(stars);
+
+  // wave grid (the sea)
+  const og=new THREE.PlaneGeometry(260,520,60,120); og.rotateX(-Math.PI/2);
+  ocean=new THREE.Mesh(og,new THREE.MeshBasicMaterial({color:0x1b6e86,wireframe:true,transparent:true,opacity:.28}));
+  ocean.position.set(0,-16,-200); scene.add(ocean);
+  ocean.userData.base=og.attributes.position.array.slice();
+
+  // antibody-ish helix drifting beside the path
+  const helix=new THREE.Group();
+  for(let i=0;i<260;i++){
+    const a=i*.28, y=(i-130)*.32;
+    for(const s of [0,Math.PI]){
+      const m=new THREE.Mesh(new THREE.SphereGeometry(.28,8,8),new THREE.MeshBasicMaterial({color:s?0xeb6834:0x3aa0ff}));
+      m.position.set(Math.cos(a+s)*3.2,y,Math.sin(a+s)*3.2); helix.add(m);
+    }
+    if(i%4===0){
+      const g=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(Math.cos(a)*3.2,y,Math.sin(a)*3.2),new THREE.Vector3(Math.cos(a+Math.PI)*3.2,y,Math.sin(a+Math.PI)*3.2)]);
+      helix.add(new THREE.Line(g,new THREE.LineBasicMaterial({color:0x4fb3ae,transparent:true,opacity:.5})));
+    }
+  }
+  helix.position.set(-26,0,-60); helix.userData.spin=.15; scene.add(helix);
+  const helix2=helix.clone(); helix2.position.set(30,6,-260); scene.add(helix2);
+  scene.userData.helices=[helix,helix2];
+
+  // 3D scatter of designs
+  scatter=new THREE.Group(); scatter.position.set(10,0,-190); scene.add(scatter);
+  const lkd=v=>Math.log10(v), X0=lkd(8), X1=lkd(330);
+  const box=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(16,10,10)),new THREE.LineBasicMaterial({color:0x4fb3ae,transparent:true,opacity:.35}));
+  scatter.add(box);
+  const grid=new THREE.GridHelper(16,16,0x2f6f76,0x1c3a44); grid.position.y=-5; scatter.add(grid);
+  const tile=(r)=>{
+    let x,y,z,col,sz;
+    if(r.track==='optimisation'){
+      x=((lkd(r.kd)-X0)/(X1-X0))*14-7; y=r.prob*9-4.5; z=-(Math.min(r.pose,3)/3)*9+4.5;
+      col=r.twin?0x7fe3d6:0x3aa0ff; sz=r.twin?.32:.42;
+    }else{
+      x=-7+(r.rank-23)*2; y=-4.8; z=-5+((r.rank%3)*5); col=0xeb6834; sz=.3;
+    }
+    const m=new THREE.Mesh(new THREE.SphereGeometry(sz,16,16),new THREE.MeshBasicMaterial({color:col}));
+    m.position.set(x,y,z); m.userData=r; scatter.add(m); pickables.push(m);
+    if(r.track==='optimisation'){
+      const g=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,-5,z),new THREE.Vector3(x,y,z)]);
+      scatter.add(new THREE.Line(g,new THREE.LineBasicMaterial({color:col,transparent:true,opacity:.28})));
+    }
+    // glow
+    const h=new THREE.Mesh(new THREE.SphereGeometry(sz*2,12,12),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.12}));
+    h.position.copy(m.position); scatter.add(h);
+  };
+  DATA.forEach(tile);
+  // trastuzumab reference marker
+  const ref=new THREE.Mesh(new THREE.OctahedronGeometry(.5),new THREE.MeshBasicMaterial({color:0xeda100,wireframe:true}));
+  ref.position.set(-7, .995*9-4.5, 4.5); ref.userData={name:'trastuzumab (reference)',cdr:'—',prob:.995,kd:.2,pose:0,rank:'ref'}; scatter.add(ref); pickables.push(ref);
+  scene.userData.ref=ref;
+}
+
+function resize(){
+  const w=innerWidth,h=innerHeight;
+  if(glOK){renderer.setSize(w,h,false);camera.aspect=w/h;
+    camera.fov = w/h<1?75:60; camera.updateProjectionMatrix();}
+}
+addEventListener('resize',resize);resize();
+
+/* ---------- navigation ---------- */
+const dots=document.getElementById('dots');
+slides.forEach((s,i)=>{const b=document.createElement('button');b.className='dotb';b.setAttribute('aria-label','Slide '+(i+1));b.onclick=()=>go(i);dots.appendChild(b)});
+function parseCam(s){const [a,b]=s.dataset.cam.split('|').map(v=>v.split(',').map(Number));return [new THREE.Vector3(...a),new THREE.Vector3(...b)]}
+function go(i){
+  i=Math.max(0,Math.min(slides.length-1,i)); cur=i;
+  slides.forEach((s,k)=>{s.classList.toggle('active',k===i);s.classList.toggle('prev',k<i)});
+  [...dots.children].forEach((d,k)=>d.classList.toggle('on',k===i));
+  document.getElementById('count').textContent=(i+1)+' / '+slides.length;
+  if(glOK){const [p,l]=parseCam(slides[i]);tgtPos.copy(p);tgtLook.copy(l)}
+  document.getElementById('tip').style.display='none';
+  history.replaceState(null,'','#'+(i+1));
+}
+document.getElementById('prev').onclick=()=>go(cur-1);
+document.getElementById('next').onclick=()=>go(cur+1);
+addEventListener('keydown',e=>{
+  if(['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)){e.preventDefault();go(cur+1)}
+  if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();go(cur-1)}
+  if(e.key==='Home')go(0); if(e.key==='End')go(slides.length-1);
+});
+let tx=null;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+addEventListener('touchend',e=>{if(tx===null)return;const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>60)go(cur+(d<0?1:-1));tx=null});
+
+/* ---------- scatter interaction ---------- */
+let drag=false,lx=0,ly=0,rotY=-.5,rotX=.25,vy=0;
+const tip=document.getElementById('tip'), ray=new THREE.Raycaster(), mouse=new THREE.Vector2();
+const onScatter=()=>slides[cur].dataset.scatter;
+canvas.addEventListener('pointerdown',e=>{if(!onScatter())return;drag=true;lx=e.clientX;ly=e.clientY});
+addEventListener('pointerup',()=>drag=false);
+addEventListener('pointermove',e=>{
+  if(!glOK||!onScatter()){tip.style.display='none';return}
+  if(drag){rotY+=(e.clientX-lx)*.008;rotX=Math.max(-.6,Math.min(.9,rotX+(e.clientY-ly)*.005));lx=e.clientX;ly=e.clientY}
+  mouse.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);
+  ray.setFromCamera(mouse,camera);
+  const hit=ray.intersectObjects(pickables)[0];
+  if(hit){
+    const r=hit.object.userData;
+    tip.innerHTML=r.rank==='ref'?`<b>${r.name}</b><br>binder p 0.995 · KD ≈ 0.2 nM`:
+      `<b>#${r.rank} ${r.name}</b><br>${r.cdr}<br>`+(r.track==='optimisation'?`p ${r.prob} · KD ${r.kd} nM<br>pose ${r.pose} Å · pH sel ${r.ph}`:`de novo · ipTM ${r.iptm} · iPAE ${r.ipae} Å`);
+    tip.style.left=Math.min(e.clientX+14,innerWidth-270)+'px';tip.style.top=e.clientY+14+'px';tip.style.display='block';
+  }else tip.style.display='none';
+});
+
+/* ---------- render loop ---------- */
+const clock=new THREE.Clock();
+function frame(){
+  requestAnimationFrame(frame);
+  if(!glOK)return;
+  const t=clock.getElapsedTime();
+  camPos.lerp(tgtPos,.045); camLook.lerp(tgtLook,.045);
+  camera.position.copy(camPos).add(new THREE.Vector3(Math.sin(t*.3)*.4,Math.cos(t*.4)*.25,0));
+  camera.lookAt(camLook);
+  stars.rotation.z=Math.sin(t*.05)*.02;
+  scene.userData.helices.forEach((h,i)=>h.rotation.y=t*h.userData.spin*(i?-1:1)||t*.15);
+  scene.userData.helices[1].rotation.y=-t*.12;
+  // waves
+  const pos=ocean.geometry.attributes.position, b=ocean.userData.base;
+  for(let i=0;i<pos.count;i++){
+    const x=b[i*3],z=b[i*3+2];
+    pos.array[i*3+1]=Math.sin(x*.12+t*.8)*1.1+Math.cos(z*.09+t*.6)*1.3;
+  }
+  pos.needsUpdate=true;
+  // scatter orbit (auto-spin gently when not dragging)
+  if(onScatter()&&!drag)rotY+=.0025;
+  scatter.rotation.y+=(rotY-scatter.rotation.y)*.12; scatter.rotation.x+=(rotX-scatter.rotation.x)*.12;
+  scene.userData.ref.rotation.y=t;
+  renderer.render(scene,camera);
+}
+go(Math.max(0,Math.min(slides.length-1,(parseInt(location.hash.slice(1))||1)-1)));
+frame();
+if(!glOK){document.body.style.background='radial-gradient(circle at 50% 30%,#12304a,#070b12)'}
+</script>
+</body>
+</html>
