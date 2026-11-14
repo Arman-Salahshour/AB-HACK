@@ -93,6 +93,46 @@ scripts/validate.sh  → abguard verdict          run this before any submission
 - Ranking decisions and their reasons go in `reports/` — 40 % of the pitch score is judgment,
   so write down *why* a design was picked, not just the number.
 
+## Decision log
+
+**2026-11-14, ~12:45 — dropped the de novo VHH track, moved GPU to optimisation.**
+
+Evidence, internal:
+
+| Batch | min_ipae | iptm | binder_pLDDT | RMSD to design | pass |
+| --- | --- | --- | --- | --- | --- |
+| CDRH3 redesign, trastuzumab framework | 0.31–0.33 | 0.95 | 96–99 | — | n/a |
+| De novo VHH, top 20 of 100 (seed 1) | 2.48–15+ | 0.43–0.82 | 89–93 | **15–51 Å** | **0/20** |
+
+The de novo VHHs fold well (pLDDT ~90) but Boltz-2 docks them 15–51 Å from the
+designed pose — they are well-formed nanobodies that bind somewhere else. All
+100 had scored 100/100 on hotspot obedience, which is RFD4 grading its own work.
+
+Evidence, external — Adaptyv's EGFR competition (601 designs characterised):
+
+- optimised existing binders **18 %** hit rate, diversified **28 %**, best de
+  novo method (BindCraft) **9 %**; RFdiffusion produced one binder in total;
+- their explicit recommendation: *start from an existing binder and redesign its
+  non-interface regions*;
+- top affinity came from 10 framework mutations to cetuximab, not de novo;
+- ranking metrics (ipTM, iPAE, ESM PLL) correlate ~0.2 with outcome and not at
+  all within the top 200 — a coarse filter, never a fine ranking;
+- expression ~95 %, "essentially solved" in cell-free, so developability
+  scoring is a marginal gain here.
+
+**The tactic that follows:** the novelty gate only examines CDRH3, so framework
+mutations are free. A design can carry a CDRH3 novel enough to pass the filter,
+the inherited paratope for epitope preservation, and stabilising framework
+mutations for thermostability — one design improving all three axes, which is
+what S-tier requires.
+
+For ranking, prefer the models trained on this system (FACS classifier 0.91
+accuracy, SPR regressor R² 0.56) over generic ESM pseudo-likelihood (AUC 0.72
+in Adaptyv's analysis).
+
+Sources: adaptyvbio.com/blog/po104, blog.booleanbiotech.com/what-we-learned-adaptyv,
+biorxiv 2025.04.17.648362.
+
 ## Open work
 
 - Calibrate the confidence filter on the Smorodina cognate/non-cognate ipTM data

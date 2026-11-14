@@ -24,6 +24,7 @@ import polars as pl
 
 from abhack.constants import (
     MIN_CDRH3_MUTATIONS_DE_NOVO,
+    MIN_CDRH3_MUTATIONS_OPTIMISATION,
     NOVELTY_IDENTITY_THRESHOLD,
     TRASTUZUMAB_VH,
     TRASTUZUMAB_VL,
@@ -175,22 +176,35 @@ def add_novelty(df: pl.DataFrame, provided: frozenset[str] | None = None) -> pl.
         if cdrh3:
             verdicts.append(classify(cdrh3, provided).as_dict())
             continue
-        de_novo = dom_id is not None and dom_id < NOVELTY_IDENTITY_THRESHOLD
+        # Mirror abguard exactly: identity >= 0.70 is its `novel` (= optimisation)
+        # class at a 3-mutation bar, BELOW it is `de_novo` at 2. A design sitting
+        # exactly on 0.70 is an optimisation design, not an unclassifiable one.
+        if dom_id is None:
+            track, required = "unknown", None
+            reason = "could not classify: no CDRH3 window and no domain identity"
+        elif dom_id < NOVELTY_IDENTITY_THRESHOLD:
+            track, required = "de_novo", MIN_CDRH3_MUTATIONS_DE_NOVO
+            reason = (
+                f"de novo domain (identity {dom_id:.4g} < {NOVELTY_IDENTITY_THRESHOLD}); "
+                "CDR3 novelty must be checked with abguard"
+            )
+        else:
+            track, required = "optimisation", MIN_CDRH3_MUTATIONS_OPTIMISATION
+            reason = (
+                f"domain identity {dom_id:.4g} >= {NOVELTY_IDENTITY_THRESHOLD}, so abguard "
+                "grades this as a trastuzumab variant at the 3-mutation bar, not de novo; "
+                "CDR3 novelty must be checked with abguard"
+            )
         verdicts.append(
             {
                 "cdrh3": None,
-                "track": "de_novo" if de_novo else "unknown",
+                "track": track,
                 "identity_to_trastuzumab_cdrh3": None,
                 "mutations_from_trastuzumab": None,
                 "min_mutations_to_provided": None,
-                "required_mutations": MIN_CDRH3_MUTATIONS_DE_NOVO if de_novo else None,
+                "required_mutations": required,
                 "passes": None,  # abguard decides; see scripts/validate.sh
-                "reason": (
-                    f"de novo domain (identity {dom_id:.2f} < 0.70); "
-                    "CDR3 novelty must be checked with abguard"
-                    if de_novo
-                    else "could not classify: no CDRH3 window and no domain identity"
-                ),
+                "reason": reason,
             }
         )
     cols = pl.DataFrame(verdicts).drop("cdrh3", strict=False)
