@@ -160,6 +160,44 @@ Low positive charge across the CDRs is the useful one: high positive CDR charge 
 associated with polyreactivity and rapid clearance, and these designs sit exactly where
 the parent does.
 
+### Measured safety of the scaffold
+
+From the FDA label for Ontruzant (trastuzumab-dttb), BLA 761100, label dated 2025-03-07,
+retrieved via AMASS RegulatoryCore. These are measured clinical outcomes for the parent
+molecule, not predictions for our designs.
+
+**Immunogenicity** (label §12.6): anti-drug antibodies were detected in **1 of 903**
+women with metastatic breast cancer (~0.1 %) by ELISA. That patient had no allergic
+reaction. The label adds that the clinical relevance of anti-trastuzumab antibodies is
+not known, and that assay differences preclude comparison across studies.
+
+**Cardiomyopathy** (label §5.1, and a boxed warning): trastuzumab products cause left
+ventricular dysfunction, arrhythmia, cardiac failure and cardiac death. There is a
+**4–6 fold increase** in symptomatic myocardial dysfunction versus patients not
+receiving them, highest when given with an anthracycline.
+
+| Study | Regimen | CHF incidence | Control |
+| --- | --- | --- | --- |
+| NSABP B31 / NCCTG N9831 | AC → paclitaxel + trastuzumab | **3.2 %** (64/2000) | 1.3 % |
+| HERA | chemotherapy → trastuzumab | 2.0 % (30/1678) | 0.3 % |
+| BCIRG006 | AC → docetaxel + trastuzumab | 2.0 % (20/1068) | 0.3 % |
+| BCIRG006 | docetaxel + carboplatin + trastuzumab | 0.4 % (4/1056) | 0.3 % |
+
+In metastatic disease with an anthracycline, cardiac dysfunction reached **28 %**
+(NYHA I–IV). LVEF monitoring every three months is mandated.
+
+**What this means for our designs.** The ~0.1 % immunogenicity rate is the floor they
+inherit from a framework and light chain that are trastuzumab's, unchanged — but it is
+not their rate, because a changed CDRH3 is a new antigenic determinant and 903 patients
+were dosed with the parent loop, not ours.
+
+Cardiotoxicity is **target-mediated**: it follows from engaging HER2 on cardiomyocytes,
+not from any property of the loop. Designs that bind the same domain IV epitope should be
+expected to carry it. Our epitope steering, which pushed contacts to the trastuzumab
+patch at precision 1.00, makes them *more* likely to share this profile, not less. That
+is the correct trade for an epitope-preservation score, and it should be stated plainly
+rather than presented as a safety advantage.
+
 **The structural argument.** Every design is trastuzumab's framework with ten CDRH3
 positions changed and the light chain unchanged — the scaffold of a drug approved by FDA
 and EMA since 1998 and marketed as at least eight products.
