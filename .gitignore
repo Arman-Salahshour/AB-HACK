@@ -22,3 +22,7 @@ ai-antibodies-hackathon-apheris.pdf
 
 # superseded by src/abhack/ (empty placeholders from the skeleton commit)
 src/*.py
+
+# never commit platform credentials (Nebius/JapanFold keys)
+*.private.json
+credentials*.json
