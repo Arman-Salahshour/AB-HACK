@@ -63,6 +63,19 @@ scripts/validate.sh  → abguard verdict          run this before any submission
   `iptm`, `binder_plddt`, and only within one folding model.
 - Do not rank on CDRH3 refold agreement: folding models do not reproduce trastuzumab's own
   CDRH3 loop, so a mismatch there means little.
+- **De novo needs a different molecule, not a different loop.** `abguard` splits the
+  tracks on identity to trastuzumab alone (`novelty.py`: `identity = 1 - (d_H + d_L) /
+  (max(|VH|,|ref VH|) + max(|VL|,|ref VL|))`, VHH uses heavy terms only). Measured:
+  caplacizumab VHH framework 0.60, our generated VHHs 0.65, adalimumab VH 0.63 / VL 0.72
+  — so a VHH clears the 0.70 line but a paired Fv on adalimumab is borderline.
+- Two traps when writing a design spec, both cost a failed run:
+  - the tutorial's VHH file encodes CDRs as residues *named* for their length
+    (`13-13`, `9-10`, `12-21` at 23/38/76), which works as a direct `--input` but
+    collides with a contig that states lengths itself — strip them, as
+    `scripts/build_denovo_input.py` does, or the module dies with "Failed to compute
+    leaving groups";
+  - generated structures **renumber every chain from 1**, so HER2 C489→1 and D591→1.
+    Anything comparing against 1N8Z numbering must shift (`abhack.epitope` does).
 - File-format gotchas, found while wiring this up: `refold_metrics.csv` keys designs by
   **`query_id`** (its `design` column is a path); `per_example_metrics.csv` keys by
   `example_id`; the FACS zip also contains a `__MACOSX/` entry. All handled in `abhack`.

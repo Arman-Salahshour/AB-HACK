@@ -61,6 +61,41 @@ python -m abhack.submission build designs/*.csv -o designs/submission.csv
 bash scripts/validate.sh designs/submission.csv
 ```
 
+## De novo track: VHH against the trastuzumab epitope
+
+The HER2-finetuned weights only redesign CDRH3 on trastuzumab's framework, so they
+produce ~97 %-identical designs that are always optimisation. For de novo you need a
+different molecule: `antibody-2026-10-30` designing all three CDRs of a VHH, docked at
+trastuzumab's epitope. A VHH sits at ~0.65 identity to trastuzumab's VH — under the
+0.70 line, so `abguard` classes it `de_novo`, where only 2 CDRH3 mutations are needed.
+
+```bash
+python scripts/build_denovo_input.py          # writes data/denovo-vhh/
+WEIGHT=antibody N=100 SEED=1 INPUT=data/denovo-vhh/design.json \
+  OUT=runs/denovo-vhh-s1 bash scripts/design.sh
+OUT=runs/denovo-vhh-s1 TOPN=20 FOLD=boltz2 WEIGHT=antibody bash scripts/refold.sh
+python -m abhack.epitope runs/denovo-vhh-s1   # is it binding where trastuzumab binds?
+python -m abhack.designs collect runs/denovo-vhh-s1 -o designs/denovo-s1.csv
+```
+
+The input folder (`scripts/build_denovo_input.py`) holds three files, per
+`data/docs/15-antibody-design.md`:
+
+| File | What |
+| --- | --- |
+| `target_her2.cif` | HER2 domain IV, chains C (489–580) + D (591–607) from the 1N8Z crop, trastuzumab's own chains dropped |
+| `framework_vhh.cif` | caplacizumab VHH framework, 83 residues with CDR gaps at 23/38/76 |
+| `design.json` | tracked in `specs/denovo-vhh/`; contig designs CDR1 13, CDR2 9–10, CDR3 12–21 |
+
+`C_HOT` pins the four HER2 atoms nearest trastuzumab's CDRH3 in 1N8Z, which is what
+makes the design compete with trastuzumab in the competitive-binding assay — the
+epitope-preservation axis. `abhack.epitope` then measures whether a design actually
+landed there: contacts within 4.5 Å, scored against the 44 HER2 residues within 10 Å
+of those hotspots.
+
+Unlike the HER2 CDRH3 exercise, `refold-score`'s `pass` column is meaningful here: a de
+novo VHH has a real designed pose, so RMSD-to-design is measurable.
+
 ## Models on this VM
 
 Design (`apheris-rfd4-proteina`, tasks `design`, `refold-prepare`, `refold-score`, `metrics`, `finetune`):
