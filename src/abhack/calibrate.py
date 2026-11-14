@@ -179,9 +179,9 @@ def report(target_fpr: float = 0.05, *, zip_path: Path | str = IPTM_ZIP) -> str:
         "pair, off-diagonal = shuffled pairing (non-binder by construction).\n"
     )
     out.append(
-        f"Negatives are **computational** shuffled pairings, not measured non-binders, and "
-        f"are an easier negative than an optimised design — so every FPR below is a "
-        f"*lower bound* on what we would see on our own candidates.\n"
+        "Negatives are **computational** shuffled pairings, not measured non-binders, and "
+        "are an easier negative than an optimised design — so every FPR below is a "
+        "*lower bound* on what we would see on our own candidates.\n"
     )
 
     out.append("## Separation\n")

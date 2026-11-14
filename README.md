@@ -70,6 +70,24 @@ python -m abhack.submission build designs/final-ranked.csv --rank-by submission_
 bash scripts/validate.sh designs/submission.csv
 ```
 
+## Optional thermal tie-break (GPU)
+
+Thermal MD is a relative unfolding screen for a complete final shortlist, not a
+Tm prediction. Current HER2 structures are paired Fvs, so the runner retains
+VL=A and VH=B while stripping HER2 C/D. It requires CUDA and refuses a silent
+CPU fallback.
+
+```bash
+uv sync
+bash scripts/run_all_thermal.sh designs/structures/*_boltz2.pdb
+python -m abhack.ranking rank designs/final-shortlist.csv -o designs/final-md-ranked.csv \
+  --thermal-results runs/thermal/thermal_scores.csv \
+  --thermal-control runs/thermal/thermal_control.csv --require-thermal
+```
+
+Use 310 K only as the `q_worst >= 0.9` gate. Use the 400 K `thermal_score` to
+re-rank screened candidates; do not attach partial MD results to the full pool.
+
 ## De novo track: VHH against the trastuzumab epitope
 
 The HER2-finetuned weights only redesign CDRH3 on trastuzumab's framework, so they

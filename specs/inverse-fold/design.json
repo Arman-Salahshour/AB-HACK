@@ -1,0 +1,33 @@
+{
+  "her2_cdrh3_decode": {
+    "input": "her2_fv_1n8z.cif",
+    "conditions": {
+      "C_CRDGRP": {
+        "1": [
+          { "select": "sel('A') and not has_nan_coord()" },
+          { "select": "sel('B') and not has_nan_coord()" }
+        ],
+        "2": [
+          { "select": "sel('C/*/*/[N,CA,C,O]') and not has_nan_coord()" },
+          { "select": "sel('D/*/*/[N,CA,C,O]') and not has_nan_coord()" }
+        ]
+      },
+      "C_SEQ": {
+        "true": [
+          { "select": "sel('A')" },
+          { "select": "sel('B/*/[1-98, 109-120]')" },
+          { "select": "sel('C')" },
+          { "select": "sel('D')" }
+        ]
+      },
+      "C_HOT": {
+        "true": [
+          { "select": "sel('C/*/572/CB')" },
+          { "select": "sel('C/*/573/CB')" },
+          { "select": "sel('D/*/591/CB')" },
+          { "select": "sel('D/*/593/CB')" }
+        ]
+      }
+    }
+  }
+}

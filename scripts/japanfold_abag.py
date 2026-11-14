@@ -48,19 +48,19 @@ def _key() -> str:
 def _call(method: str, path: str, payload: dict | None = None) -> dict:
     cmd = ["curl", "-s", "--max-time", "180",
            "-H", f"Authorization: Bearer {_key()}", "-H", "X-JapanFold-Client: skill"]
-    tmp = None
+    tmp_name = None
     if payload is not None:
-        tmp = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
-        json.dump(payload, tmp)
-        tmp.close()
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as tmp:
+            json.dump(payload, tmp)
+        tmp_name = tmp.name
         cmd += ["-X", method, "-H", "Content-Type: application/json",
-                "-H", f"Idempotency-Key: {uuid.uuid4()}", "-d", f"@{tmp.name}"]
+                "-H", f"Idempotency-Key: {uuid.uuid4()}", "-d", f"@{tmp_name}"]
     cmd.append(f"{BASE}{path}")
     try:
         out = subprocess.run(cmd, capture_output=True, text=True, check=True).stdout
     finally:
-        if tmp is not None:
-            os.unlink(tmp.name)
+        if tmp_name is not None:
+            os.unlink(tmp_name)
     try:
         return json.loads(out)
     except json.JSONDecodeError:

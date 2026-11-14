@@ -179,6 +179,16 @@ predictor look usable, which is the error the module exists to prevent.
 
 ## Conventions
 
+- **Two agent sessions share this VM and this repo** (2026-11-14). The other
+  session killed this one's `opt-explore-s13` design run (13:35, 55/100 designs)
+  and the `opt-novel-s12-gated` refold chain (~14:20) to free the GPU for its own
+  jobs. The H100 fits concurrent jobs (a design run and a Boltz-2 fold each use
+  ~4 GB of 80 GB and slow each other only mildly) — **do not kill the other
+  session's processes; launch alongside**. Check `nvidia-smi --query-compute-apps`
+  and `ps aux | grep module-run` before and after launching anything long. Both
+  sessions commit to the same repo — read `git log` and `CLAUDE.md` before
+  changing shared files (`ranking.py` gained the other session's thermal columns;
+  they merged cleanly).
 - Raw data stays in `data/raw/` (gitignored); parquet caches in `data/processed/`.
 - One run folder per design config: `runs/<weight>-s<seed>[-<setting>]`, with `run.log`.
 - Every design table keeps `design_id`, `cdrh3`, `vh_sequence`, `vl_sequence` so it can be
@@ -187,6 +197,28 @@ predictor look usable, which is the error the module exists to prevent.
   so write down *why* a design was picked, not just the number.
 
 ## Decision log
+
+**2026-11-14, ~14:20 — local novelty mirror was too permissive: Hamming vs Levenshtein.**
+
+`abguard team-validate` rejected `WSSAVGYAMD` (2 Levenshtein mutations from the
+FACS loop `WSSVGDYAMD`) that our local `classify()` passed (Hamming 3). Root
+cause: `novelty.distance()` used **Hamming for equal-length windows**, but
+abguard always uses **Levenshtein on the flanked 13-mer**, where an indel-shifted
+pair can be closer than its substitution count (`AVGY` → `VGDY` is one deletion
++ one insertion = 2, not 3). Since the trastuzumab flanks are constant, window
+edit distance == 13-mer edit distance, so the fix is Levenshtein everywhere
+(`novelty.py:distance`) with a vectorised `polars-distance` pass in
+`min_mutations_to_provided` (~0.5 s against the full 525k set; `polars-distance`
+added to the project deps — the namespace is `.dist_str.levenshtein`, not
+`.dist`, on polars 2.1). All three opt tables re-classified: s11 66→64 pass,
+s12 74 (unchanged count, membership differs), s13 55→20 pass (the exploratory
+loops cluster near FACS neighbours). The prior submission dry-run (`--descending`
+on `submission_order`, now fixed in the README flow) had also put the table in
+reverse order — build with `--rank-by submission_order` and **no** `--descending`.
+
+De novo probe (8 candidates incl. BoltzGen): **8/8 valid** under abguard
+(team-validate) — the de novo track is submittable; BoltzGen descriptions now
+carry `weight=boltzgen` + CDR3 (`build_denovo_table.py`).
 
 **2026-11-14, ~14:05 — de novo verdict is now definitive; ranking collapsed into `abhack.ranking`; thermostability tickets built.**
 
@@ -244,6 +276,20 @@ Read this section before touching ranking or the de novo track; it supersedes th
 - Current flow: `abhack.ranking rank designs/opt-s*.csv -o designs/opt-ranked.csv`
   → `abhack.tickets` → `abhack.ranking merge` → `abhack.submission build --rank-by
   submission_order --descending` → `scripts/validate.sh`. Tests: 56 passing.
+- **Gate-first refolding** (`scripts/refold_gated.py`): builds a *filtered design
+  dir* (config + only the gated survivors + filtered per_example_metrics.csv +
+  filtered/synthesised result.json) so `refold-prepare --top-n <n>` takes exactly
+  the ranking's survivors instead of RFD4's pre-oracle ordering. Three traps, all
+  hit and fixed:
+  - `result.json`'s `result.designs` lists every original file; it must be filtered
+    to the selection or prepare dies with "a file listed in the design result.json
+    is missing";
+  - a run killed mid-flight (opt-explore-s13, cancelled 13:35 by the parallel
+    agent's session — 55/100 designs, no inference_metrics) has no result.json at
+    all; the builder synthesises one from a sibling run's template;
+  - **sample dirs are copied, never symlinked**: a relative symlink resolves from
+    the link's own directory (dangling), an absolute one breaks inside the docker
+    `/work` mount. Real copies are ~2 MB each — cheaper than either trap.
 
 **2026-11-14, ~12:45 — dropped the de novo VHH track, moved GPU to optimisation.**
 
@@ -381,5 +427,5 @@ is no spec fix to make on that account.
   **`docs/pipeline.html`** — standalone, open it in a browser, no server or build step.
   Mirrored at https://claude.ai/artifact/7EFQa8tE1fePRTgGhWH18Y (anyone with the link). The
   repo copy is the one that survives the VM; keep the two in step if either changes.
-- Tests: 35 passing (`.venv/bin/python -m pytest tests/ -q`) across `test_novelty.py`,
+- Tests: 58 passing (`.venv/bin/python -m pytest tests/ -q`) across `test_novelty.py`,
   `test_submission.py`, `test_calibrate.py`.

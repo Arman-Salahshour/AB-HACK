@@ -1,0 +1,13 @@
+rank,design,design_id,cdrh3,designed_pdb,refolded_pdb,min_ipae,iptm,binder_plddt,backbone_rmsd,p_high,pred_kd_nM,mutations_from_trastuzumab,min_mutations_to_provided,chains
+1,Depitope_72,her2_cdrh3_epitope_72,STRSVDYAFD,01_Depitope_72_designed.pdb,01_Depitope_72_boltz2.pdb,0.2917,0.969,98.5077,0.705,,,7,3,A:107 B:120 C:92 D:17
+2,Depitope_11,her2_cdrh3_epitope_11,STLSVSYAFD,02_Depitope_11_designed.pdb,02_Depitope_11_boltz2.pdb,0.2945,0.969,98.5717,0.8521,,,7,3,A:107 B:120 C:92 D:17
+3,Depitope_37,her2_cdrh3_epitope_37,WASLYDYYFD,03_Depitope_37_designed.pdb,03_Depitope_37_boltz2.pdb,0.2997,0.97,98.5515,0.8739,,,7,2,A:107 B:120 C:92 D:17
+4,Depitope_76,her2_cdrh3_epitope_76,WASLYDYYFD,04_Depitope_76_designed.pdb,04_Depitope_76_boltz2.pdb,0.2997,0.97,98.5515,0.8435,,,7,2,A:107 B:120 C:92 D:17
+5,Depitope_78,her2_cdrh3_epitope_78,WASLYEYYFD,05_Depitope_78_designed.pdb,05_Depitope_78_boltz2.pdb,0.3005,0.971,98.708,0.7979,,,7,3,A:107 B:120 C:92 D:17
+6,Depitope_85,her2_cdrh3_epitope_85,WASLYEYYFD,06_Depitope_85_designed.pdb,06_Depitope_85_boltz2.pdb,0.3005,0.971,98.708,0.9935,,,7,3,A:107 B:120 C:92 D:17
+7,Depitope_88,her2_cdrh3_epitope_88,FPWPAIQAFD,07_Depitope_88_designed.pdb,07_Depitope_88_boltz2.pdb,0.3041,0.964,98.0759,0.7301,,,8,4,A:107 B:120 C:92 D:17
+8,Depitope_95,her2_cdrh3_epitope_95,SRRAVDYAFD,08_Depitope_95_designed.pdb,08_Depitope_95_boltz2.pdb,0.3058,0.966,98.6331,0.8602,,,7,3,A:107 B:120 C:92 D:17
+9,Depitope_14,her2_cdrh3_epitope_14,YASLHDYYFD,09_Depitope_14_designed.pdb,09_Depitope_14_boltz2.pdb,0.3092,0.969,98.5967,0.761,,,8,3,A:107 B:120 C:92 D:17
+10,Depitope_28,her2_cdrh3_epitope_28,WASHYDYYFD,10_Depitope_28_designed.pdb,10_Depitope_28_boltz2.pdb,0.3098,0.967,98.4235,0.884,,,7,3,A:107 B:120 C:92 D:17
+11,Depitope_73,her2_cdrh3_epitope_73,ATRAVDYAFD,11_Depitope_73_designed.pdb,11_Depitope_73_boltz2.pdb,0.3133,0.961,98.2584,0.9122,,,7,3,A:107 B:120 C:92 D:17
+12,Depitope_30,her2_cdrh3_epitope_30,WASSYYYYFD,12_Depitope_30_designed.pdb,12_Depitope_30_boltz2.pdb,0.3137,0.967,98.225,1.161,,,7,3,A:107 B:120 C:92 D:17

@@ -128,7 +128,10 @@ def build(run_dir: Path, out: Path, ids: list[str]) -> Path:
         if not src.is_dir():
             print(f"  missing {src}; skipped")
             continue
-        (gen_out / "inference_samples" / design_id).symlink_to(src, target_is_directory=True)
+        # real copies, not symlinks: a relative target resolves from the link's
+        # own directory, an absolute one breaks inside the docker /work mount —
+        # ~2 MB per design is cheaper than either trap
+        shutil.copytree(src, gen_out / "inference_samples" / design_id, dirs_exist_ok=True)
         n += 1
 
     if metrics.exists():

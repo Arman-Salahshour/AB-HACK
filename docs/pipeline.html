@@ -135,8 +135,9 @@
     <h1>HER2 design pipeline</h1>
     <p class="lede">
       Six stages from a design spec to twenty designs Adaptyv can order. Three gates
-      decide what survives — one is enforced, one is measured but not wired in, one
-      does not exist yet.
+      decide what survives: novelty and measured confidence are enforced before ranking;
+      developability is only partly covered (liability penalty and framework tickets,
+      no solubility or aggregation predictors yet).
     </p>
   </header>
 
@@ -170,13 +171,13 @@
           <text x="486" y="168" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".75">per_example_metrics.csv · 91 cols</text>
 
           <line x1="240" y1="200" x2="240" y2="232" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)"/>
-          <text x="258" y="212" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor">scripts/refold.sh</text>
-          <text x="258" y="229" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--missing)">▲ top-N picked here, before any gate</text>
+          <text x="258" y="212" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor">scripts/refold_gated.py</text>
+          <text x="258" y="229" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--missing)">gate first: refold_gated.py refolds survivors only</text>
 
           <!-- stage 3 -->
           <rect x="28" y="238" width="424" height="68" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/>
           <text x="46" y="266" font-family="IBM Plex Sans, sans-serif" font-size="15" font-weight="600" fill="currentColor">3 · Refold — the honesty check</text>
-          <text x="46" y="286" font-family="IBM Plex Sans, sans-serif" font-size="11.5" fill="currentColor" opacity=".7">prepare → Boltz-2 (templated) → score</text>
+          <text x="46" y="286" font-family="IBM Plex Sans, sans-serif" font-size="11.5" fill="currentColor" opacity=".7">prepare → Boltz-2 (templated) → score · AF2-IG, OpenDDE cross-checks</text>
           <text x="486" y="264" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".75">scored-boltz2/refold_metrics.csv</text>
           <text x="486" y="280" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".75">min_ipae · iptm · binder_plddt · rmsd</text>
 
@@ -191,7 +192,7 @@
           <text x="486" y="392" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".75">sequences · CDRs · novelty verdict</text>
 
           <line x1="240" y1="424" x2="240" y2="456" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)"/>
-          <text x="258" y="444" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor">abhack.submission build</text>
+          <text x="258" y="444" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor">abhack.ranking rank → merge → submission build</text>
 
           <!-- stage 5 -->
           <rect x="28" y="462" width="424" height="104" rx="5" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".9"/>
@@ -199,14 +200,14 @@
           <text x="46" y="506" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" opacity=".7">three independent gates</text>
           <rect x="46" y="514" width="124" height="22" rx="11" fill="none" stroke="var(--ok)" stroke-width="1.2"/>
           <text x="108" y="529" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--ok)">novelty ✓</text>
-          <rect x="178" y="514" width="124" height="22" rx="11" fill="none" stroke="var(--partial)" stroke-width="1.2" stroke-dasharray="4 3"/>
-          <text x="240" y="529" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--partial)">confidence ~</text>
-          <rect x="310" y="514" width="124" height="22" rx="11" fill="none" stroke="var(--missing)" stroke-width="1.2" stroke-dasharray="2 3"/>
-          <text x="372" y="529" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--missing)">developability ✗</text>
-          <text x="46" y="555" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" opacity=".7">rank survivors on interface PAE — not on ipTM</text>
+          <rect x="178" y="514" width="124" height="22" rx="11" fill="none" stroke="var(--ok)" stroke-width="1.2"/>
+          <text x="240" y="529" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--ok)">confidence ✓</text>
+          <rect x="310" y="514" width="124" height="22" rx="11" fill="none" stroke="var(--partial)" stroke-width="1.2" stroke-dasharray="4 3"/>
+          <text x="372" y="529" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--partial)">developability ~</text>
+          <text x="46" y="555" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" opacity=".7">gates first, then z-composite on interface PAE — not ipTM</text>
           <text x="486" y="500" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".75">designs/submission.csv</text>
           <text x="486" y="516" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".75">sequence_id · kind · heavy · light</text>
-          <text x="486" y="532" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".75">≤ 20 rows, best first</text>
+          <text x="486" y="532" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".75">≤ 20 rows · quota 12 optimisation / 8 de novo</text>
 
           <line x1="240" y1="572" x2="240" y2="604" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)"/>
           <text x="258" y="592" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor">scripts/validate.sh</text>
@@ -223,10 +224,11 @@
         </svg>
         <figcaption>
           Each stage writes files the next one reads, so any stage can be re-run from disk.
-          The marked edge is the problem: <code>refold.sh</code> passes <code>--top-n</code>, so
-          RFD4's own ordering decides what gets refolded — before novelty, epitope or
-          confidence has been consulted. In the smoke run that picked two designs that scored
-          worse and skipped the two that passed novelty most comfortably.
+          The old <code>refold.sh</code> passed <code>--top-n</code>, so RFD4's own ordering
+          decided what got refolded before novelty or confidence were consulted. That edge is
+          fixed: <code>scripts/refold_gated.py</code> builds a filtered design directory so only
+          gate survivors are refolded. A single ranking path, <code>abhack.ranking</code>,
+          replaced the old two.
         </figcaption>
       </figure>
     </div>
@@ -262,8 +264,8 @@
           <tbody>
             <tr>
               <td>Affinity</td>
-              <td class="m">min_ipae, iptm (refold)<br>affinity.joblib (optimisation only)</td>
-              <td><span class="chip c-partial">calibrated, unwired</span></td>
+              <td class="m">min_ipae ≤ 2.0 gate, binder_plddt<br>p_high / pkd_pred (optimisation only)<br>AF2-IG and OpenDDE as cross-checks</td>
+              <td><span class="chip c-partial">wired into ranking</span></td>
             </tr>
             <tr>
               <td>Epitope preservation</td>
@@ -272,8 +274,8 @@
             </tr>
             <tr>
               <td>Thermostability</td>
-              <td class="m">nothing — no provided data</td>
-              <td><span class="chip c-missing">absent</span></td>
+              <td class="m">framework tickets VH S85N+R87T (literature, not measured here)<br>CDRH3 liability penalty<br>thermal MD screen: tested, not yet run</td>
+              <td><span class="chip c-partial">proxy only</span></td>
             </tr>
           </tbody>
         </table>
@@ -330,11 +332,15 @@
         an interface PAE of 18.2. No design is good on both, so none looks like a real binder.
       </p>
       <p style="margin-bottom:10px">
-        One explanation is still open, and it bounds the conclusion: the refold ran with
-        <code>msa_path: None</code> on every chain, so Boltz-2 predicted single-sequence. It is an
-        MSA-dependent model, so its pose judgement was handicapped and 0/20 overstates how bad the
-        designs are. AF2-IG is the right control — it starts from the designed coordinates instead
-        of rediscovering the pose from sequence. Until that runs, treat this as probable, not settled.
+        One explanation was open: the first refold ran with <code>msa_path: None</code> on every
+        chain, so Boltz-2 predicted single-sequence, and 0/20 may have overstated how bad the
+        designs were. AF2-IG was the control, because it starts from the designed coordinates
+        instead of rediscovering the pose. It has now run on 40 designs (two seeds, 20 each):
+        ipTM 0.09–0.34 and interface PAE 19–27 Å for every one, while binder pLDDT stays
+        0.89–0.93. Two independent architectures agree, so the single-sequence caveat no longer
+        rescues the track. BoltzGen designs scored weakly too (best ipTM 0.32 on its own scores,
+        PAE 8.8–18 Å, and 0.46 / PAE 16 Å for the best under AF2-IG). A refold with a full MSA on the
+        same designs was not run, so the Boltz-2 numbers alone still carry that caveat.
       </p>
       <p>
         Root cause at the level of the weights: de novo ran on
@@ -355,13 +361,13 @@
         <tbody>
           <tr>
             <td>Apheris Foundry</td>
-            <td class="m">rfd4-proteina (antibody, her2-novel)<br>boltz2 — every refold</td>
+            <td class="m">rfd4-proteina (antibody, her2, her2-novel)<br>boltz2 — primary refold<br>OpenDDE antibody–antigen refold, MSA depth 12,652 (24 designs)</td>
             <td class="m">openfold3 · of3ob (OpenBind)<br>protenix v2/v1 · mol1 · esmfold2<br>RFD4 finetune task</td>
           </tr>
           <tr>
             <td>JapanFold</td>
-            <td class="m">skill installed 12:27<br>not yet called</td>
-            <td class="m">AF2-IG — scores a binder you<br>already designed · RoseTTAFold3 · OpenDDE</td>
+            <td class="m">AF2-IG — 40 de novo VHHs and BoltzGen designs<br>BoltzGen (off-box) — 20 returned, 8 scored</td>
+            <td class="m">RoseTTAFold3 · ProteinMPNN · developability tools</td>
           </tr>
           <tr>
             <td>Other</td>
@@ -372,34 +378,35 @@
       </table>
     </div>
     <p style="margin-top:14px">
-      Every design we have passed through one design model and one folding model, and the
-      calibration above says that folding model is the weakest of the three measured. A second
-      opinion from a different architecture would separate "the designs are bad" from "Boltz-2
-      is wrong about them" — right now those are indistinguishable.
+      Boltz-2 is the weakest of the three predictors measured in the calibration, so every
+      verdict that matters now has a second opinion from a different architecture. AF2-IG did that
+      for the de novo track. The optimisation designs were refolded with OpenDDE and an MSA, but
+      the OpenFold3 and Protenix cross-checks are still untouched.
     </p>
   </section>
 
   <section>
     <h2>Open gaps</h2>
     <ul>
-      <li>Thermostability has no score of any kind, and it is a third of the result. The 130
-        liability occurrences <code>abguard</code> already reports are free input.</li>
-      <li><code>epitope_fraction</code> is computed for all 100 designs and joined to nothing.
-        37 of 100 fall below 1.0, so it discriminates — though on the refolded set it did
-        <em>not</em> predict docking success, so treat it as a measurement of the judged axis
-        rather than a binding predictor.</li>
-      <li>Two ranking paths still exist: <code>evaluate.py</code> computes a composite that
-        <code>submission.py</code> ignores. One of them should go.</li>
-      <li>Interface size is the one cheap signal that tracked docking accuracy on the refolded
-        set (contacts ρ = −0.58, H-bond pairs ρ = −0.44, and longer VHH worse at ρ = +0.50) —
-        all at n = 20, so suggestive and not settled.</li>
+      <li>Thermostability is a third of the result and has only proxies: two literature framework
+        mutations (S85N+R87T, which also creates an NLT glycosylation sequon, flagged and not
+        filtered) and a CDRH3 liability penalty. Aggrescan3D, SoluProt, NetSolP and TAP-style
+        developability checks are not installed. The thermal MD screen passed a plumbing test on one
+        trastuzumab structure (0.05 ns) but has no baseline or shortlist results.</li>
+      <li><code>epitope_fraction</code> discriminates as a measurement (37 of 100 de novo
+        designs below 1.0) but did <em>not</em> predict docking success on the refolded set, so
+        it measures the judged axis and is not a binding predictor.</li>
+      <li>The calibration negatives are computational shuffled pairings, not measured non-binders,
+        so every false-positive rate is a lower bound on what an optimised design would see.</li>
+      <li>Boltz-2 numbers on the optimisation track partly reflect a templated crystal complex
+        supplying the answer. OpenFold3 / Protenix refolds would check this.</li>
     </ul>
   </section>
 
   <p class="foot">
-    Repo <code>/home/hackathon/ab-hack</code> · 35 tests passing · calibration in
+    Repo <code>/home/hackathon/ab-hack</code> · 58 tests passing · calibration in
     <code>reports/calibration.md</code> · thresholds and verified behaviour in
-    <code>CLAUDE.md</code>. Figures reflect the state at 14 Nov 2026, early afternoon.
+    <code>CLAUDE.md</code>. Figures reflect the state at 14 Nov 2026, mid-afternoon (after the AF2-IG, BoltzGen and gate-first refold work).
   </p>
 </main>
 </body>

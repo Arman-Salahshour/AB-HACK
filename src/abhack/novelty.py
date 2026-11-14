@@ -61,8 +61,17 @@ def identity(a: str, b: str) -> float:
 
 
 def distance(a: str, b: str) -> int:
-    """Hamming for equal lengths, edit distance otherwise."""
-    return hamming(a, b) if len(a) == len(b) else levenshtein(a, b)
+    """Edit distance — always Levenshtein, exactly like `abguard`.
+
+    `abguard` compares the flanked IMGT CDR3 (13-mer) with Levenshtein, where an
+    indel-shifted pair can be closer than its substitution count suggests
+    (``AVGY`` -> ``VGDY`` is one deletion + one insertion = 2, not 3). Hamming on
+    equal-length windows — what this used to do — passes designs abguard then
+    rejects (caught on ``WSSAVGYAMD`` vs the FACS loop ``WSSVGDYAMD``: local 3,
+    abguard 2, 2026-11-14). The trastuzumab flanks are constant, so the window
+    edit distance equals the 13-mer edit distance.
+    """
+    return levenshtein(a, b)
 
 
 def mutations_from_trastuzumab(cdrh3: str) -> int:
@@ -75,21 +84,36 @@ def mutations_from_trastuzumab(cdrh3: str) -> int:
 
 
 def min_mutations_to_provided(cdrh3: str, provided: frozenset[str] | set[str]) -> int:
-    """Distance to the closest provided CDRH3 (exact match -> 0).
+    """Distance to the closest provided CDRH3 (exact match -> 0), abguard-style.
+
+    Levenshtein, so an indel-shifted neighbour counts as it does in `abguard`
+    (``WSSAVGYAMD`` vs the FACS loop ``WSSVGDYAMD`` is 2, not 3 — the local
+    Hamming mirror passed a design abguard rejects, 2026-11-14).
 
     ``provided`` holds the 10-residue windows from the FACS and SPR tables, so
     pass a window here too.
     """
     if cdrh3 in provided:
         return 0
-    best = len(cdrh3)
-    for known in provided:
-        d = distance(cdrh3, known)
-        if d < best:
-            best = d
-            if best == 1:
-                break
-    return best
+    try:
+        import polars as pl
+        import polars_distance  # noqa: F401 — registers the .dist_str namespace
+
+        known = pl.Series("known", sorted(provided), dtype=pl.String)
+        return int(
+            known.to_frame()
+            .select(pl.col("known").dist_str.levenshtein(pl.lit(cdrh3)).min())
+            .item()
+        )
+    except ImportError:  # pragma: no cover - slow path without the plugin
+        best = len(cdrh3)
+        for known in provided:
+            d = levenshtein(cdrh3, known)
+            if d < best:
+                best = d
+                if best == 1:
+                    break
+        return best
 
 
 @dataclass(frozen=True)

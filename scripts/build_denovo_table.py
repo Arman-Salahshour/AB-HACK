@@ -54,6 +54,12 @@ def build(boltzgen: Path, rfd4_tables: list[Path], af2ig: Path) -> pl.DataFrame:
         generator_iptm=pl.col("boltzgen_iptm"),
         generator_ipae=pl.col("boltzgen_ipae"),
     )
+    # CDR3 + weight so the submission description carries real provenance
+    segs = [segment(s) for s in bg["vh_sequence"].to_list()]
+    bg = bg.with_columns(
+        cdr3_imgt=pl.Series([s.cdr3 if s and not s.error else None for s in segs]),
+        weight=pl.lit("boltzgen"),
+    )
 
     frames = [bg]
     scored = pl.read_csv(af2ig, infer_schema_length=10_000)
@@ -69,12 +75,13 @@ def build(boltzgen: Path, rfd4_tables: list[Path], af2ig: Path) -> pl.DataFrame:
                     source=pl.col("run"),
                     generator_iptm=pl.lit(None, dtype=pl.Float64),
                     generator_ipae=pl.lit(None, dtype=pl.Float64),
+                    weight=pl.lit("rfd4-antibody"),
                 ))
         frames.append(df)
 
     common = ["design_id", "vh_sequence", "vl_sequence", "format", "cdrh3", "cdr3_imgt",
-              "source", "af2ig_iptm", "af2ig_ipae", "af2ig_plddt", "generator_iptm",
-              "generator_ipae", "passes"]
+              "source", "weight", "af2ig_iptm", "af2ig_ipae", "af2ig_plddt",
+              "generator_iptm", "generator_ipae", "passes"]
     out = pl.concat([f.select([c for c in common if c in f.columns]) for f in frames],
                     how="diagonal_relaxed")
     return add_liabilities(out)

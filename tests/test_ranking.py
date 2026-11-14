@@ -17,7 +17,6 @@ import pytest
 from abhack.liabilities import count_motifs, liability_penalty, penalty
 from abhack.ranking import IPAE_GATE, composite_score, gate, merge
 
-
 # --- liabilities ---------------------------------------------------------------
 
 def test_count_motifs_sees_the_calibrated_tags():
