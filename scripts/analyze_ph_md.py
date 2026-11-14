@@ -30,6 +30,11 @@ def analyse(stem: str) -> dict:
     meta = json.load(open(f"{stem}.json"))
     ANTIGEN = tuple(meta.get("antigen", ["C", "D"]))
     traj = md.load(f"{stem}.dcd", top=f"{stem}_top.pdb")
+    # Re-image: chains wrap across the box independently and fake an interface break.
+    if traj.unitcell_lengths is not None:
+        mols = traj.topology.find_molecules()
+        # mdtraj's anchor guess needs a >1800-atom molecule; chains here are smaller, so anchor on the largest
+        traj.image_molecules(inplace=True, anchor_molecules=[max(mols, key=len)])
     top = traj.topology
     fv = [a.index for a in top.atoms if a.residue.chain.chain_id not in ANTIGEN and a.element.symbol != "H"]
     ag = [a.index for a in top.atoms if a.residue.chain.chain_id in ANTIGEN and a.element.symbol != "H"]

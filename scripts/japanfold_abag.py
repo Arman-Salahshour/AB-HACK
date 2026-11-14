@@ -90,6 +90,8 @@ def main() -> int:
     ap.add_argument("--name", default="abag")
     ap.add_argument("--submit", action="store_true")
     ap.add_argument("--poll")
+    ap.add_argument("--params", default=None, help='JSON, e.g. {"write_pae": true, "output_format": "pdb"}')
+    ap.add_argument("--fetch", default=None, help="with --poll: download the job archive into this directory")
     args = ap.parse_args()
 
     if args.poll:
@@ -102,6 +104,14 @@ def main() -> int:
             print(f"{'design':18} {'iptm':>6} {'plddt':>7}")
             for r in rows:
                 print(f"{r.get('id',''):18} {r.get('iptm',0):6.3f} {r.get('complex_plddt',0):7.3f}")
+        if args.fetch and job.get("status") == "succeeded":
+            import zipfile
+            out = Path(args.fetch)
+            out.mkdir(parents=True, exist_ok=True)
+            subprocess.run(["curl", "-fsL", "-o", str(out / "archive.zip"), "-H", f"Authorization: Bearer {_key()}",
+                            "-H", "X-JapanFold-Client: skill", f"{BASE}/v1/jobs/{args.poll}/archive"], check=True)
+            zipfile.ZipFile(out / "archive.zip").extractall(out)
+            print(f"fetched -> {out}")
         report_credits("after poll")
         return 0
 
@@ -122,8 +132,10 @@ def main() -> int:
         return 0
 
     report_credits("before submit")
-    job = _call("POST", "/v1/predictions",
-                {"model": args.model, "name": args.name, "targets": targets})
+    payload = {"model": args.model, "name": args.name, "targets": targets}
+    if args.params:
+        payload["params"] = json.loads(args.params)
+    job = _call("POST", "/v1/predictions", payload)
     if "id" not in job:
         raise SystemExit(f"submit refused: {json.dumps(job, indent=1)[:900]}")
     print(f"job {job['id']} status={job.get('status')}")

@@ -198,6 +198,25 @@ predictor look usable, which is the error the module exists to prevent.
 
 ## Decision log
 
+**2026-11-14, ~16:10 — MD stopped early; analysis scripts had a periodic-image bug; pH gate moved to -0.2.**
+
+- **Imaging bug (fixed in `analyze_thermal.py` and `analyze_ph_md.py`).** The DCDs are not re-imaged, so a chain
+  that crosses the box boundary looks like VH-VL separation: the 400 K trastuzumab reference showed Rg ratio 2.1
+  and RMSD 2.6 nm after 0.4 ns while each chain's own Rg stayed constant and the VL-VH COM distance jumped by one
+  box length (7.5 nm). Both scripts now call `image_molecules` anchored on the largest molecule (mdtraj's own
+  anchor guess needs a >1800-atom molecule and raises). Reference 400 K thermal_score 0.907 -> 0.954. The pH
+  interface Q values were unchanged. Any thermal score computed before this fix is suspect.
+- **MD stopped by the user at ~16:05 UTC.** Finished: 3 reference pH runs (1.1 ns). Partial (marked `"partial": true`
+  by `scripts/partial_meta.py`): reference thermal 310 K (0.66 ns) and 400 K x2 (0.4 ns), reference pH 7.4 r2,
+  `her2_cdrh3_28` pH 6.5 r1, `opt43` pH 6.5 x2. Never started: thermal for `her2_cdrh3_28` and its `-ft` twin,
+  any design at pH 7.4. There is therefore no design thermostability or pH-gap result.
+- **Reference pH noise.** Reference Q(6.5)=0.944 vs Q(7.4)=0.880 (gap +0.064) with replica spread up to 0.05:
+  a gap that size is noise at 1 ns. `PH_MD_NOISE_FLOOR` (0.02) is below this; use the measured spread.
+- **pH gate is -0.2, not 0.** The same design scored on its designed structure and on its Boltz-2 refold differs by
+  0.10 on average (n=8, up to 0.29) and 133/225 designs sit within +-0.05 of zero. `designs/best50.csv` is the
+  gated top 50 of 225 unique opt sequences. design_id repeats across runs: join pH scores on (vh, vl), never on id.
+
+
 **2026-11-14, ~15:00 — `designs/submission.csv` final: 20/20 valid, 12 optimisation / 8 de novo.**
 
 Built by `bash scripts/final_submission.sh` (the canonical one-command pipeline):

@@ -62,8 +62,11 @@ COMPONENTS: tuple[tuple[str, bool, float], ...] = (
 )
 
 #: pH gate (hard): a *measured* propka selectivity log10 K(6.5)/K(7.4) below this is out, i.e. a design
-#: that binds better at plasma/heart pH (7.4) than at tumour pH (6.5). Null = unscored, stays.
-PH_MIN_SELECTIVITY = 0.0
+#: that clearly binds better at plasma/heart pH (7.4) than at tumour pH (6.5). Null = unscored, stays.
+#: -0.2 is about two standard deviations of propka's structural noise: the same design scored on its
+#: designed structure and on its Boltz-2 refold differed by 0.10 on average (sd 0.135, max 0.29, n=8), and
+#: 133 of 225 designs sit within +-0.05 of zero, so a gate at 0 would split a noise cluster at random.
+PH_MIN_SELECTIVITY = -0.2
 #: selectivity a design needs before MD agreement can earn it credit (about 2x).
 PH_CREDIT_MIN = 0.3
 #: credit needs the MD contact-retention gap to exceed this many control-replica spreads.

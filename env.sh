@@ -63,10 +63,13 @@ abrun() {
 
 export -f rfd4_image fold_image fold_has_template abrun 2>/dev/null || true
 
-# --- AMASS (biomedical literature & regulatory search) -----------------------
-export AMASS_API_KEY="***REMOVED***"
-export AMASS_BASE_URL="https://api.amass.tech/api/v1"
-
-# --- JapanFold (structure prediction & binder design) ------------------------
-export JAPANFOLD_API_KEY="***REMOVED***"
-export JAPANFOLD_BASE_URL="https://api.japanfold.aiand.com"
+# --- External APIs (keys live in .env.private, gitignored) -------------------
+# AMASS  : AMASS_API_KEY / AMASS_BASE_URL  (https://api.amass.tech)
+# JapanFold: JAPANFOLD_API_KEY / JAPANFOLD_BASE_URL (https://api.japanfold.aiand.com)
+if [ -f "$AB_ROOT/.env.private" ]; then
+  # shellcheck source=/dev/null
+  set -a; . "$AB_ROOT/.env.private"; set +a
+fi
+if [ -f "$HOME/.claude/skills/amass/SKILL.md" ] || [ -f "$HOME/.claude/skills/japanfold/SKILL.md" ]; then
+  : # skills present; keys should be exported already via .env.private
+fi

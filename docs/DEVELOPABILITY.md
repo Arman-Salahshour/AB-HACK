@@ -439,3 +439,9 @@ prediction for therapeutic proteins
 ([FASEB J 2008;22:563](https://faseb.onlinelibrary.wiley.com/doi/10.1096/fasebj.22.2_supplement.563)).
 This is why section 5 reports the parent's *measured* anti-drug antibody rate rather than a
 predicted immunogenicity score for our designs.
+
+**Free triage now available (no NetMHCIIpan license):** `designs/s21-immunogenicity.csv` from
+`src/abhack/immunogenicity.py` — IEDB DRB1 6-allele probe or deterministic anchor fallback,
+OASis-9-mer humanness proxy, PITHA-like CDR length/hphob/charge + TAP/APR scans. VHHs score
+lower MHC-II burden (12–19 vs 31–33 for paired Fabs) due to single-chain count; interpret only
+as relative burden, not ADA-rate, and do not use to gate submission. See `docs/TOOLS.md`.

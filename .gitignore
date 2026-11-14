@@ -101,3 +101,7 @@ ai-antibodies-hackathon-apheris.pdf
 credentials*.json
 *.key
 *.pem
+
+# secrets (keys loaded via env.sh)
+.env.private
+*.key

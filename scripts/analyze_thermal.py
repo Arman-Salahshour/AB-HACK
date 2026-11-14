@@ -48,6 +48,12 @@ def main():
             print(f"skip {prefix}: missing topology/metadata")
             continue
         traj = md.load(dcd, top=top)
+        # Chains wrap across the periodic box independently; without re-imaging, a chain that crosses the
+        # boundary looks like VH-VL separation (Rg ratio ~2, RMSD ~2.5 nm after 0.4 ns) and corrupts q_native.
+        if traj.unitcell_lengths is not None:
+            mols = traj.topology.find_molecules()
+            # mdtraj's anchor guess needs a >1800-atom molecule; chains here are smaller, so anchor on the largest
+            traj.image_molecules(inplace=True, anchor_molecules=[max(mols, key=len)])
         if traj.n_frames < 5:
             print(f"skip {prefix}: <5 frames")
             continue

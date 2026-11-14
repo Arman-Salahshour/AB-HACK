@@ -21,6 +21,7 @@
     --ok: #2f7a4d;
     --partial: #9a6612;
     --missing: #a33b2a;
+    --s1: #2a78d6; --s2: #eb6834; --ref: #5e676e;
     --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
     --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
   }
@@ -35,6 +36,7 @@
       --ok: #5fb37d;
       --partial: #d6a243;
       --missing: #e07a63;
+      --s1: #3987e5; --s2: #d95926; --ref: #9aa3aa;
       color-scheme: dark;
     }
   }
@@ -48,6 +50,7 @@
     --ok: #5fb37d;
     --partial: #d6a243;
     --missing: #e07a63;
+    --s1: #3987e5; --s2: #d95926; --ref: #9aa3aa;
     color-scheme: dark;
   }
 
@@ -134,6 +137,19 @@
   .f-zero-mark { width: 3px; height: 16px; background: var(--missing); border-radius: 2px; }
   .f-n { font-family: var(--font-mono); font-size: 12.5px; font-variant-numeric: tabular-nums; }
   .f-note { font-size: 12.5px; color: var(--muted); }
+  /* radar */
+  .rcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 18px; }
+  .rcard { margin: 0; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .rcard figcaption { margin: 0; display: flex; justify-content: space-between; gap: 8px; font-size: 13px; flex-wrap: wrap; }
+  .radar { width: 100%; height: auto; display: block; }
+  .radar .rg { fill: none; stroke: var(--line); stroke-width: 1; }
+  .radar .ax { stroke: var(--line); stroke-width: 1; }
+  .radar .al { font: 500 11px var(--font-sans); fill: var(--muted); }
+  .rbig { margin: 0; display: grid; grid-template-columns: minmax(240px, 380px) minmax(0, 1fr); gap: 24px; align-items: center; }
+  @media (max-width: 720px) { .rbig { grid-template-columns: minmax(0, 1fr); } }
+  .legend { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; }
+  .legend li { margin: 0; max-width: none; display: flex; gap: 10px; align-items: center; }
+  .sw { width: 14px; height: 14px; border-radius: 3px; flex: none; }
   .foot { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
 </style>
 <style>
@@ -252,6 +268,45 @@
     </div>
   </section>
 
+  <!-- results-radar:start -->
+  <section>
+    <h2>Results at a glance</h2>
+    <p>
+      The four axes that matter most, scaled 0&ndash;1 with 1 better. Each chart is one design from the
+      best-50 pool. Hover a point for the underlying value; the table below the charts has every number.
+    </p>
+    <div class="rcards"><figure class="rcard"><svg viewBox="-12 0 388 256" role="img" aria-label="Design her2_cdrh3_28: Affinity 0.87, Thermostability 0.70, pH selectivity 0.28, Safety proxy 0.89" class="radar"><polygon points="160.0,112.5 175.5,128.0 160.0,143.5 144.5,128.0" class="rg"/><polygon points="160.0,97.0 191.0,128.0 160.0,159.0 129.0,128.0" class="rg"/><polygon points="160.0,81.5 206.5,128.0 160.0,174.5 113.5,128.0" class="rg"/><polygon points="160.0,66.0 222.0,128.0 160.0,190.0 98.0,128.0" class="rg"/><line x1="160" y1="128" x2="160.0" y2="66.0" class="ax"/><text x="160.0" y="52.6" text-anchor="middle" class="al">Affinity</text><line x1="160" y1="128" x2="222.0" y2="128.0" class="ax"/><text x="239.4" y="132.0" text-anchor="start" class="al">Thermostability</text><line x1="160" y1="128" x2="160.0" y2="190.0" class="ax"/><text x="160.0" y="211.4" text-anchor="middle" class="al">pH selectivity</text><line x1="160" y1="128" x2="98.0" y2="128.0" class="ax"/><text x="80.6" y="132.0" text-anchor="end" class="al">Safety proxy</text><polygon points="160.0,74.2 203.1,128.0 160.0,145.6 104.9,128.0" fill="var(--s1)" fill-opacity="0.14" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round"/><circle cx="160.0" cy="74.2" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_28 - Affinity: p(high) 0.87, predicted KD 10 nM</title></circle><circle cx="203.1" cy="128.0" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_28 - Thermostability: loop gap 3.0 pLDDT (proxy)</title></circle><circle cx="160.0" cy="145.6" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_28 - pH selectivity: propka selectivity +0.03</title></circle><circle cx="104.9" cy="128.0" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_28 - Safety proxy: 1 CDRH3 liabilities</title></circle></svg><figcaption><strong>#1 her2_cdrh3_28</strong><span class="m">WPSGGTYGYD</span></figcaption></figure><figure class="rcard"><svg viewBox="-12 0 388 256" role="img" aria-label="Design her2_cdrh3_43: Affinity 0.88, Thermostability 0.54, pH selectivity 0.67, Safety proxy 0.78" class="radar"><polygon points="160.0,112.5 175.5,128.0 160.0,143.5 144.5,128.0" class="rg"/><polygon points="160.0,97.0 191.0,128.0 160.0,159.0 129.0,128.0" class="rg"/><polygon points="160.0,81.5 206.5,128.0 160.0,174.5 113.5,128.0" class="rg"/><polygon points="160.0,66.0 222.0,128.0 160.0,190.0 98.0,128.0" class="rg"/><line x1="160" y1="128" x2="160.0" y2="66.0" class="ax"/><text x="160.0" y="52.6" text-anchor="middle" class="al">Affinity</text><line x1="160" y1="128" x2="222.0" y2="128.0" class="ax"/><text x="239.4" y="132.0" text-anchor="start" class="al">Thermostability</text><line x1="160" y1="128" x2="160.0" y2="190.0" class="ax"/><text x="160.0" y="211.4" text-anchor="middle" class="al">pH selectivity</text><line x1="160" y1="128" x2="98.0" y2="128.0" class="ax"/><text x="80.6" y="132.0" text-anchor="end" class="al">Safety proxy</text><polygon points="160.0,73.7 193.5,128.0 160.0,169.4 111.8,128.0" fill="var(--s1)" fill-opacity="0.14" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round"/><circle cx="160.0" cy="73.7" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_43 - Affinity: p(high) 0.88, predicted KD 9 nM</title></circle><circle cx="193.5" cy="128.0" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_43 - Thermostability: loop gap 4.6 pLDDT (proxy)</title></circle><circle cx="160.0" cy="169.4" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_43 - pH selectivity: propka selectivity +0.33</title></circle><circle cx="111.8" cy="128.0" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_43 - Safety proxy: 2 CDRH3 liabilities</title></circle></svg><figcaption><strong>#2 her2_cdrh3_43</strong><span class="m">WYGRGWYVPD</span></figcaption></figure><figure class="rcard"><svg viewBox="-12 0 388 256" role="img" aria-label="Design her2_cdrh3_56: Affinity 0.65, Thermostability 0.74, pH selectivity 0.23, Safety proxy 0.81" class="radar"><polygon points="160.0,112.5 175.5,128.0 160.0,143.5 144.5,128.0" class="rg"/><polygon points="160.0,97.0 191.0,128.0 160.0,159.0 129.0,128.0" class="rg"/><polygon points="160.0,81.5 206.5,128.0 160.0,174.5 113.5,128.0" class="rg"/><polygon points="160.0,66.0 222.0,128.0 160.0,190.0 98.0,128.0" class="rg"/><line x1="160" y1="128" x2="160.0" y2="66.0" class="ax"/><text x="160.0" y="52.6" text-anchor="middle" class="al">Affinity</text><line x1="160" y1="128" x2="222.0" y2="128.0" class="ax"/><text x="239.4" y="132.0" text-anchor="start" class="al">Thermostability</text><line x1="160" y1="128" x2="160.0" y2="190.0" class="ax"/><text x="160.0" y="211.4" text-anchor="middle" class="al">pH selectivity</text><line x1="160" y1="128" x2="98.0" y2="128.0" class="ax"/><text x="80.6" y="132.0" text-anchor="end" class="al">Safety proxy</text><polygon points="160.0,87.5 205.8,128.0 160.0,142.2 109.7,128.0" fill="var(--s1)" fill-opacity="0.14" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round"/><circle cx="160.0" cy="87.5" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_56 - Affinity: p(high) 0.65, predicted KD 12 nM</title></circle><circle cx="205.8" cy="128.0" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_56 - Thermostability: loop gap 2.6 pLDDT (proxy)</title></circle><circle cx="160.0" cy="142.2" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_56 - pH selectivity: propka selectivity -0.02</title></circle><circle cx="109.7" cy="128.0" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_56 - Safety proxy: 1 CDRH3 liabilities</title></circle></svg><figcaption><strong>#3 her2_cdrh3_56</strong><span class="m">YMSLYYYAFD</span></figcaption></figure><figure class="rcard"><svg viewBox="-12 0 388 256" role="img" aria-label="Design her2_cdrh3_26: Affinity 0.84, Thermostability 0.97, pH selectivity 0.14, Safety proxy 1.00" class="radar"><polygon points="160.0,112.5 175.5,128.0 160.0,143.5 144.5,128.0" class="rg"/><polygon points="160.0,97.0 191.0,128.0 160.0,159.0 129.0,128.0" class="rg"/><polygon points="160.0,81.5 206.5,128.0 160.0,174.5 113.5,128.0" class="rg"/><polygon points="160.0,66.0 222.0,128.0 160.0,190.0 98.0,128.0" class="rg"/><line x1="160" y1="128" x2="160.0" y2="66.0" class="ax"/><text x="160.0" y="52.6" text-anchor="middle" class="al">Affinity</text><line x1="160" y1="128" x2="222.0" y2="128.0" class="ax"/><text x="239.4" y="132.0" text-anchor="start" class="al">Thermostability</text><line x1="160" y1="128" x2="160.0" y2="190.0" class="ax"/><text x="160.0" y="211.4" text-anchor="middle" class="al">pH selectivity</text><line x1="160" y1="128" x2="98.0" y2="128.0" class="ax"/><text x="80.6" y="132.0" text-anchor="end" class="al">Safety proxy</text><polygon points="160.0,75.8 219.8,128.0 160.0,136.4 98.0,128.0" fill="var(--s1)" fill-opacity="0.14" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round"/><circle cx="160.0" cy="75.8" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_26 - Affinity: p(high) 0.84, predicted KD 107 nM</title></circle><circle cx="219.8" cy="128.0" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_26 - Thermostability: loop gap 0.3 pLDDT (proxy)</title></circle><circle cx="160.0" cy="136.4" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_26 - pH selectivity: propka selectivity -0.09</title></circle><circle cx="98.0" cy="128.0" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_26 - Safety proxy: 0 CDRH3 liabilities</title></circle></svg><figcaption><strong>#4 her2_cdrh3_26</strong><span class="m">TTSSVGYAHD</span></figcaption></figure><figure class="rcard"><svg viewBox="-12 0 388 256" role="img" aria-label="Design her2_cdrh3_52: Affinity 0.73, Thermostability 0.41, pH selectivity 0.26, Safety proxy 1.00" class="radar"><polygon points="160.0,112.5 175.5,128.0 160.0,143.5 144.5,128.0" class="rg"/><polygon points="160.0,97.0 191.0,128.0 160.0,159.0 129.0,128.0" class="rg"/><polygon points="160.0,81.5 206.5,128.0 160.0,174.5 113.5,128.0" class="rg"/><polygon points="160.0,66.0 222.0,128.0 160.0,190.0 98.0,128.0" class="rg"/><line x1="160" y1="128" x2="160.0" y2="66.0" class="ax"/><text x="160.0" y="52.6" text-anchor="middle" class="al">Affinity</text><line x1="160" y1="128" x2="222.0" y2="128.0" class="ax"/><text x="239.4" y="132.0" text-anchor="start" class="al">Thermostability</text><line x1="160" y1="128" x2="160.0" y2="190.0" class="ax"/><text x="160.0" y="211.4" text-anchor="middle" class="al">pH selectivity</text><line x1="160" y1="128" x2="98.0" y2="128.0" class="ax"/><text x="80.6" y="132.0" text-anchor="end" class="al">Safety proxy</text><polygon points="160.0,82.5 185.3,128.0 160.0,144.3 98.0,128.0" fill="var(--s1)" fill-opacity="0.14" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round"/><circle cx="160.0" cy="82.5" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_52 - Affinity: p(high) 0.73, predicted KD 30 nM</title></circle><circle cx="185.3" cy="128.0" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_52 - Thermostability: loop gap 5.9 pLDDT (proxy)</title></circle><circle cx="160.0" cy="144.3" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_52 - pH selectivity: propka selectivity +0.01</title></circle><circle cx="98.0" cy="128.0" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_52 - Safety proxy: 0 CDRH3 liabilities</title></circle></svg><figcaption><strong>#5 her2_cdrh3_52</strong><span class="m">YASSSDYYFD</span></figcaption></figure><figure class="rcard"><svg viewBox="-12 0 388 256" role="img" aria-label="Design her2_cdrh3_8: Affinity 0.74, Thermostability 0.20, pH selectivity 0.22, Safety proxy 0.88" class="radar"><polygon points="160.0,112.5 175.5,128.0 160.0,143.5 144.5,128.0" class="rg"/><polygon points="160.0,97.0 191.0,128.0 160.0,159.0 129.0,128.0" class="rg"/><polygon points="160.0,81.5 206.5,128.0 160.0,174.5 113.5,128.0" class="rg"/><polygon points="160.0,66.0 222.0,128.0 160.0,190.0 98.0,128.0" class="rg"/><line x1="160" y1="128" x2="160.0" y2="66.0" class="ax"/><text x="160.0" y="52.6" text-anchor="middle" class="al">Affinity</text><line x1="160" y1="128" x2="222.0" y2="128.0" class="ax"/><text x="239.4" y="132.0" text-anchor="start" class="al">Thermostability</text><line x1="160" y1="128" x2="160.0" y2="190.0" class="ax"/><text x="160.0" y="211.4" text-anchor="middle" class="al">pH selectivity</text><line x1="160" y1="128" x2="98.0" y2="128.0" class="ax"/><text x="80.6" y="132.0" text-anchor="end" class="al">Safety proxy</text><polygon points="160.0,82.1 172.2,128.0 160.0,141.4 105.3,128.0" fill="var(--s1)" fill-opacity="0.14" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round"/><circle cx="160.0" cy="82.1" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_8 - Affinity: p(high) 0.74, predicted KD 18 nM</title></circle><circle cx="172.2" cy="128.0" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_8 - Thermostability: loop gap 8.0 pLDDT (proxy)</title></circle><circle cx="160.0" cy="141.4" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_8 - pH selectivity: propka selectivity -0.03</title></circle><circle cx="105.3" cy="128.0" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"><title>her2_cdrh3_8 - Safety proxy: 1 CDRH3 liabilities</title></circle></svg><figcaption><strong>#6 her2_cdrh3_8</strong><span class="m">WKGPDLYYFA</span></figcaption></figure></div>
+    <div class="scroll"><table><thead><tr><th>#</th><th>Design</th><th>CDRH3</th><th class='m'>Affinity</th><th class='m'>Thermo (proxy)</th><th class='m'>pH</th><th class='m'>Safety</th><th class='m'>Pred. K<sub>D</sub> nM</th><th class='m'>pH sel.</th><th class='m'>Loop gap</th></tr></thead><tbody><tr><td>1</td><td class='m'>her2_cdrh3_28</td><td class='m'>WPSGGTYGYD</td><td class='m num'>0.87</td><td class='m num'>0.70</td><td class='m num'>0.28</td><td class='m num'>0.89</td><td class='m num'>9.7</td><td class='m num'>+0.03</td><td class='m num'>3.0</td></tr><tr><td>2</td><td class='m'>her2_cdrh3_43</td><td class='m'>WYGRGWYVPD</td><td class='m num'>0.88</td><td class='m num'>0.54</td><td class='m num'>0.67</td><td class='m num'>0.78</td><td class='m num'>9.2</td><td class='m num'>+0.33</td><td class='m num'>4.6</td></tr><tr><td>3</td><td class='m'>her2_cdrh3_56</td><td class='m'>YMSLYYYAFD</td><td class='m num'>0.65</td><td class='m num'>0.74</td><td class='m num'>0.23</td><td class='m num'>0.81</td><td class='m num'>11.7</td><td class='m num'>-0.02</td><td class='m num'>2.6</td></tr><tr><td>4</td><td class='m'>her2_cdrh3_26</td><td class='m'>TTSSVGYAHD</td><td class='m num'>0.84</td><td class='m num'>0.97</td><td class='m num'>0.14</td><td class='m num'>1.00</td><td class='m num'>107.5</td><td class='m num'>-0.09</td><td class='m num'>0.3</td></tr><tr><td>5</td><td class='m'>her2_cdrh3_52</td><td class='m'>YASSSDYYFD</td><td class='m num'>0.73</td><td class='m num'>0.41</td><td class='m num'>0.26</td><td class='m num'>1.00</td><td class='m num'>29.7</td><td class='m num'>+0.01</td><td class='m num'>5.9</td></tr><tr><td>6</td><td class='m'>her2_cdrh3_8</td><td class='m'>WKGPDLYYFA</td><td class='m num'>0.74</td><td class='m num'>0.20</td><td class='m num'>0.22</td><td class='m num'>0.88</td><td class='m num'>17.8</td><td class='m num'>-0.03</td><td class='m num'>8.0</td></tr></tbody></table></div>
+    <p style="margin-top:14px">
+      <strong>How to read the axes.</strong> Affinity is the FACS binder model's probability of a high
+      binder; trastuzumab scores 0.995 on it. Thermostability here is a <em>proxy</em>: how much less
+      confident the Boltz-2 refold is about the redesigned CDRH3 loop than about the framework (gap 0 scores
+      1, gap 10 scores 0). pH selectivity is the propka prediction of binding at 6.5 relative to 7.4, mapped
+      from &minus;0.2 to +0.6; trastuzumab sits at 0.25, and the prediction moves by about 0.1&ndash;0.3
+      with the structure used. Safety is a sequence proxy from CDRH3 liabilities, hydrophobicity and positive
+      charge. It is not a toxicity prediction, and it cannot see target-mediated cardiotoxicity, which any
+      design on this epitope inherits.
+    </p>
+    <h3 style="margin:22px 0 10px;font-size:15px">Proof of concept: MD results so far</h3>
+    <p style="margin:0 0 12px">These runs were stopped early, so every number below comes from a fraction of the planned
+      simulation time. Only the trastuzumab reference completed any thermal run; the design and its framework twin
+      never started, so there is no thermostability comparison yet.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Run</th><th>Simulated</th><th>Result</th><th>What it shows</th></tr></thead>
+      <tbody>
+        <tr><td>Reference Fv, 310 K</td><td class="m">0.66 ns</td><td class="m num">score 0.983</td><td>Stable, as expected.</td></tr>
+        <tr><td>Reference Fv, 400 K (2 replicas)</td><td class="m">0.40 ns</td><td class="m num">score 0.954, contacts kept 0.97</td><td>Fv intact at 400 K; too short to see unfolding.</td></tr>
+        <tr><td>Reference complex, pH 6.5 vs 7.4</td><td class="m">0.74&ndash;1.0 ns</td><td class="m num">Q 0.94 vs 0.88, gap +0.06</td><td>The reference alone shows a gap; replicas differ by up to 0.05, so a gap this size is noise.</td></tr>
+        <tr><td>Top design, pH 6.5 only</td><td class="m">0.74 ns</td><td class="m num">Q 0.95</td><td>Inside the reference's 6.5 range (0.92&ndash;0.97); no 7.4 run, so no pH comparison.</td></tr>
+        <tr><td>Design 43, pH 6.5 only</td><td class="m">0.57&ndash;0.59 ns</td><td class="m num">Q 0.85&ndash;0.90</td><td>Shorter runs; not comparable.</td></tr>
+      </tbody></table></div>
+    <p style="margin-top:12px"><strong>Not run:</strong> thermal MD for the top design and its twin, and any design at pH 7.4.
+      <strong>Analysis fix:</strong> chains wrapped across the periodic box and faked an Fv break in the 400 K reference
+      (radius of gyration ratio 2.1); after re-imaging the molecules the Fv is intact and the score moved from 0.907 to 0.954.
+      The pH interface values were unchanged by the fix.</p>
+  </section>
+  <!-- results-radar:end -->
+
   <section>
     <h2>The funnel: what survives each filter</h2>
     <div class="funnels">
@@ -259,10 +314,11 @@
         <h3>Optimisation track</h3>
         <ol>
         <li class="f-row"><div class="f-label">Generated </div><div class="f-track"><div class="f-bar f-start" style="width:100.0%"></div><span class="f-n">255</span></div><div class="f-note">3 runs, 225 unique sequences</div></li>
-        <li class="f-row"><div class="f-label">Novelty gate <span class="chip c-ok">filter</span></div><div class="f-track"><div class="f-bar f-hard" style="width:62.0%"></div><span class="f-n">158</span></div><div class="f-note">97 removed (3 mutations from every known loop)</div></li>
-        <li class="f-row"><div class="f-label">Refolded, interface PAE ≤ 2.0 Å <span class="chip c-ok">filter</span></div><div class="f-track"><div class="f-bar f-hard" style="width:23.9%"></div><span class="f-n">61</span></div><div class="f-note">97 novel designs not yet refolded stay undecided</div></li>
-        <li class="f-row"><div class="f-label">pH gate (selectivity ≥ 0) <span class="chip c-ok">filter</span></div><div class="f-track"><div class="f-bar f-hard" style="width:2.7%"></div><span class="f-n">7</span></div><div class="f-note">scored for the 12 selected only: 5 of 12 would go</div></li>
-        <li class="f-row"><div class="f-label">MD filters (two-pH, thermal 310 K) <span class="chip c-partial">pending</span></div><div class="f-track"><div class="f-bar f-zero-mark"></div><span class="f-n">0</span></div><div class="f-note">none evaluated; control runs only</div></li>
+        <li class="f-row"><div class="f-label">Unique and novel <span class="chip c-ok">filter</span></div><div class="f-track"><div class="f-bar f-hard" style="width:54.5%"></div><span class="f-n">139</span></div><div class="f-note">3 mutations from every known loop; unrefolded designs stay undecided</div></li>
+        <li class="f-row"><div class="f-label">Refolded, interface PAE ≤ 2.0 Å <span class="chip c-ok">filter</span></div><div class="f-track"><div class="f-bar f-hard" style="width:22.4%"></div><span class="f-n">57</span></div><div class="f-note">82 novel designs not yet refolded</div></li>
+        <li class="f-row"><div class="f-label">pH gate (selectivity ≥ −0.2) <span class="chip c-ok">filter</span></div><div class="f-track"><div class="f-bar f-hard" style="width:51.0%"></div><span class="f-n">130</span></div><div class="f-note">removes only a clear preference for pH 7.4</div></li>
+        <li class="f-row"><div class="f-label">MD filters (two-pH, thermal 310 K) <span class="chip c-partial">pending</span></div><div class="f-track"><div class="f-bar f-zero-mark"></div><span class="f-n">0</span></div><div class="f-note">stopped early: reference and a partial pH control only; no design removed</div></li>
+        <li class="f-row"><div class="f-label">Best 50 <span class="chip c-ok">filter</span></div><div class="f-track"><div class="f-bar f-hard" style="width:19.6%"></div><span class="f-n">50</span></div><div class="f-note">top 50 by composite</div></li>
         <li class="f-row"><div class="f-label">Submission slots </div><div class="f-track"><div class="f-bar f-end" style="width:4.7%"></div><span class="f-n">12</span></div><div class="f-note">4 parent + framework-twin pairs, 4 singles</div></li>
         </ol>
       </div>
@@ -272,18 +328,19 @@
         <li class="f-row"><div class="f-label">Generated </div><div class="f-track"><div class="f-bar f-start" style="width:100.0%"></div><span class="f-n">220</span></div><div class="f-note">200 RFD4 VHHs + 20 BoltzGen returned</div></li>
         <li class="f-row"><div class="f-label">Scored by AF2-IG (designed coordinates) <span class="chip c-ok">filter</span></div><div class="f-track"><div class="f-bar f-hard" style="width:21.8%"></div><span class="f-n">48</span></div><div class="f-note">40 RFD4 + 8 BoltzGen</div></li>
         <li class="f-row"><div class="f-label">Credible interface (ipTM ≥ 0.6, PAE ≤ 3 Å) <span class="chip c-ok">filter</span></div><div class="f-track"><div class="f-bar f-zero-mark"></div><span class="f-n">0</span></div><div class="f-note">best BoltzGen ipTM 0.46, PAE 16 Å</div></li>
-        <li class="f-row"><div class="f-label">pH gate (selectivity ≥ 0) <span class="chip c-ok">filter</span></div><div class="f-track"><div class="f-bar f-hard" style="width:3.2%"></div><span class="f-n">7</span></div><div class="f-note">of the 8 selected; the top score has a likely wrong pose</div></li>
+        <li class="f-row"><div class="f-label">pH gate (selectivity ≥ −0.2) <span class="chip c-ok">filter</span></div><div class="f-track"><div class="f-bar f-hard" style="width:3.6%"></div><span class="f-n">8</span></div><div class="f-note">of the 8 selected; the top score has a likely wrong pose</div></li>
         <li class="f-row"><div class="f-label">MD filters (two-pH, thermal 310 K) <span class="chip c-partial">pending</span></div><div class="f-track"><div class="f-bar f-zero-mark"></div><span class="f-n">0</span></div><div class="f-note">none evaluated</div></li>
         <li class="f-row"><div class="f-label">Submission slots </div><div class="f-track"><div class="f-bar f-end" style="width:3.6%"></div><span class="f-n">8</span></div><div class="f-note">least-bad, ordered last; abguard-valid</div></li>
         </ol>
       </div>
     </div>
     <p style="margin-top:16px">
-      Bar length is the count at that stage, relative to the first. Filters before the MD rows are
-      enforced. The MD filters are the thermal screen (a 310 K control must keep
-      <code>q_worst</code> &ge; 0.9) and the two-pH interface MD; they are wired into the ranking
-      but have not been run on any candidate, so no design has been removed by them. The submission
-      count is not the end of the filter: it is the quota, filled with the best evidence available.
+      Bar length is the count at that stage, relative to the first. Filters before the MD row are
+      enforced. The MD filters are the thermal screen (a 310 K control must keep <code>q_worst</code>
+      &ge; 0.9) and the two-pH interface MD; they are wired into the ranking, but the proof-of-concept runs were
+      stopped early, so no design has been removed by them. The pH gate sits at &minus;0.2
+      because the same design scored on its designed structure and on its refold differs by about 0.10 on
+      average (up to 0.29): a gate at 0 would split that noise at random.
     </p>
   </section>
 
@@ -469,7 +526,7 @@
           </tr>
           <tr>
             <td class="m">abhack.ranking<br>pH gate</td>
-            <td>A measured selectivity below 0 removes the design. Unscored designs stay (undecided, not failed). <code>--no-ph-gate</code> switches it off</td>
+            <td>A measured selectivity below &minus;0.2 (about two standard deviations of propka's structural noise) removes the design. Unscored designs stay (undecided, not failed). <code>--no-ph-gate</code> switches it off</td>
             <td><span class="chip c-ok">in code</span></td>
           </tr>
           <tr>

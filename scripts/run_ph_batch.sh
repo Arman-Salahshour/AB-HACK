@@ -12,6 +12,7 @@ case " $SYSTEMS " in *" ctrl:"*) ;; *) SYSTEMS="ctrl:C,D $SYSTEMS" ;; esac
 for spec in $SYSTEMS; do
   name=${spec%%:*}; ag=${spec##*:}
   for ph in $PHS; do for r in $(seq 1 "$REPS"); do
+    [ "${SKIP_EXISTING:-1}" = 1 ] && [ -f "$D/${name}_pH${ph}_r${r}.json" ] && continue
     echo ".venv/bin/python scripts/run_ph_md.py --pdb $D/inputs/$name.pdb --out $D/${name}_pH${ph}_r${r} --ph $ph --ns $NS --seed $r --antigen $ag" >> "$D/joblist.txt"
   done; done
 done

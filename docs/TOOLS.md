@@ -78,8 +78,12 @@ Listing these because their absence shapes what the benchmark can claim.
 | **NetSolP** | solubility | not on PyPI; DTU download plus ESM weights |
 | **SoluProt** | solubility | not on PyPI; web service |
 | **FoldX / ThermoMPNN / DeepSTABp** | folding ΔΔG and Tm | licensed or blocked from execution |
-| **NetMHCIIpan** | immunogenicity (T-cell epitopes) | licensed |
+| **NetMHCIIpan** | immunogenicity (T-cell epitopes) | licensed; **free proxy now in `immunogenicity.py` using IEDB + anchor matrices** |
 | **Nebius `stab-ddg`** | binding ΔΔG — a third affinity estimate | endpoint located (`POST /models/stab-ddg:submit`, returns 422 not 404) but the batch protocol needs an artifact upload whose tooling (`~/japanfold/agent/forge.py`) is missing from the provided folder |
+| **IEDB MHC-II consensus** | T-cell epitope burden (DRB1*01:01/03:01/04:01/07:01/11:01/15:01, 15mers) + NetMHCIIpan fallback | `src/abhack/immunogenicity.py` | offline proxy; live IEDB probe when reachable (1–2 s), burden proxy otherwise |
+| **OASis / BioPhi proxy** | humanness via 9-mer identity to IGHV3-66 (trastuzumab germline) | same | not the licensed Hu-mAb; rank-only |
+| **PITHA-like / TAP-like** | CDR cavity/length/hphob + APR/TAP surface-patch proxies (83%/65% PITHA accuracies quoted as structure vs model) | same | crystal-vs-model gap applies; no ADA-rate claim |
+| **Aggrescan-inspired** | aggregation-prone region scan (WYF/VIL, hydropathy ≥0.8, ≥3 aromatics per 5-mer) | same | TANGO threshold analogue, not installed Aggrescan3D |
 
 **Consequences, stated plainly:**
 
