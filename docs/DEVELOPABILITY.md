@@ -137,6 +137,13 @@ From the two models trained on this exact system. Full table:
 | D08 | WNYAYDYAMD | 0.063 | 23.2 nM | 18 | 0.314 | 0.68 Å |
 | D09 | STLSVSYAFD | 0.034 | 255.1 nM | 18 | 0.295 | 0.85 Å |
 
+**Both models are calibrated, with numbers.** The FACS classifier reaches **AUROC 0.989**
+on 50,151 held-out variants (high vs low); the SPR regressor reaches **0.930** out-of-fold
+at separating sub-nanomolar binders from the rest (its in-sample 0.989 was overfit by
+0.09, and is not reported as the headline). For comparison, ipTM as a binder classifier on
+the Smorodina cognate/non-cognate set scores 0.754 (AlphaFold3), 0.645 (Boltz-2) and 0.568
+(Chai-1).
+
 **The parent is the positive control, and the models pass it.** Run on trastuzumab's own
 CDRH3 they return P(high) = 0.995 and K_D 0.22 nM against a measured 0.029–0.178 nM —
 accurate on the one sequence whose answer is known. That makes the rest of the column

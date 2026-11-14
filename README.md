@@ -1,169 +1,149 @@
-# ab-hack — Oslo Antibodies × AI hackathon (HER2 / trastuzumab)
+# ab-hack — trastuzumab × HER2
 
-Pipeline for improving trastuzumab against HER2, judged on three axes measured by Adaptyv:
+Oslo Antibodies × AI hackathon, 14 November 2026. An agent-driven pipeline that designs
+antibody variants against HER2, validates them with models that never saw the designs,
+and ranks them on the only evidence that survives scrutiny.
 
-1. **Affinity** — SPR binding to HER2, vs. the trastuzumab baseline.
-2. **Epitope preservation** — competitive binding against trastuzumab.
-3. **Thermostability** — direct measurement.
+**Submission:** [`odyssey.csv`](odyssey.csv) — 30 designs, 30/30 `abguard`-valid,
+24 optimisation + 6 de novo, ranked.
 
-A design that beats the baseline on all three is S-tier; two → A-tier; one → B-tier.
-Up to 20 ranked designs are submitted, split freely between the **de novo** and
-**optimisation** tracks.
+---
 
-## Hard filters (enforced by `abguard`)
+## The three findings
 
-| Filter | Rule |
+**1. Structure prediction cannot rank these designs.** On the organisers' own
+cognate/non-cognate dataset (91 real pairs, ~8,100 shuffled), ipTM works as a binder
+classifier at **AUROC 0.754 (AlphaFold3), 0.645 (Boltz-2), 0.568 (Chai-1)**. On our 20
+candidates the three predictors correlate **−0.15 to +0.13** with each other. Meanwhile a
+classifier trained on the 524,346-variant FACS screen reaches **AUROC 0.989** on held-out
+data, and the SPR regressor **0.930** at identifying sub-nanomolar binders. So structure
+became a pass/fail gate and the measurement-trained models do the ranking.
+
+**2. A generator cannot grade its own work.** 100 de novo designs scored **100/100** on
+RFD4's own hotspot-obedience metric; **0 of 20** survived independent refolding — binder
+pLDDT ~0.92 but 15–51 Å from the designed pose. AF2-IG agreed (ipTM 0.11–0.34 against a
+0.5 threshold), and BoltzGen's own de novo pipeline agreed too. The de novo track was
+dropped at 12:45 and the GPU moved to optimisation. This is why the pipeline has two
+agents with opposed incentives.
+
+**3. Using the measured epitope changes the designs.** Replacing the organisers' 4
+hotspot atoms with the team's 17-residue mapped epitope, everything else identical:
+
+| | 4 atoms | **17 residues** | 22-residue consensus |
+| --- | --- | --- | --- |
+| strong refolds | 13/30 | **30/30** | 24/30 |
+| median `iptm` | 0.793 | **0.962** | 0.954 |
+| median RMSD | 1.17 Å | **0.85 Å** | 0.94 Å |
+
+---
+
+## Results
+
+```
+682 designs generated     348 abguard-eligible     78 structurally validated
+```
+
+**Top candidates** (full table in [`docs/SUBMISSION.md`](docs/SUBMISSION.md)):
+
+| CDRH3 | P(high) | pred K_D | epitope | RMSD |
+| --- | --- | --- | --- | --- |
+| `WVYAGSYAHD` | 0.759 | **4.9 nM** | 18 | 1.04 Å |
+| `YASLYVYAHD` | 0.761 | 17.5 nM | 18 | 0.91 Å |
+| `YASLHDYYFD` | **0.883** | 87.7 nM | 17 | 0.76 Å |
+| *trastuzumab* | **0.995** | **0.22 nM** | — | — |
+
+**The honest headline: no design is predicted to beat trastuzumab on affinity.** Best
+predicted K_D is 4.9 nM against a measured 0.029–0.178 nM. The models are calibrated —
+they score the parent at 0.995 and 0.22 nM — so this is a real gap, not a modelling
+artefact. S-tier via CDRH3 redesign alone looks out of reach; A-tier (epitope preserved
+plus thermostability) is the realistic target.
+
+---
+
+## The pipeline
+
+```
+ structures ─┐
+ epitope     ├──► GENERATE ──► gate ──► rank ──► SUBMIT
+ scaffold   ─┘    RFD4          │        │
+                                │        └─ FACS classifier  AUROC 0.989
+                                │           SPR regressor    AUROC 0.930
+                                └─ abguard (hard filters + novelty)
+                                   Boltz-2 refold (pass/fail)
+                                   epitope contact ≥16 at ≥0.9 precision
+```
+
+```bash
+uv sync && source env.sh
+bash scripts/fetch_data.sh small
+
+python -m abhack.pipeline generate --spec specs/opt-epitope/design.json --seed 1 --refold
+python -m abhack.pipeline validate --run runs/opt-epitope-s1     # CPU, runs during generation
+python -m abhack.pipeline finalise --runs runs/... --limit 30
+bash scripts/validate.sh designs/SUBMISSION.csv
+```
+
+**Always pass `--compile true` to generation:** measured **3.3×** (18.0 → 5.5 s/design).
+We ran 682 designs without it and spent ~2.5 h of GPU where ~45 min would have done.
+
+### Two agents, opposed on purpose
+
+`.claude/agents/` defines them; `docs/agents/` explains them.
+
+- **`ab-generator`** proposes designs and is **forbidden from claiming they bind**.
+- **`ab-evaluator`** judges with evidence the generator cannot produce, and is told **not
+  to soften a null result**.
+
+Reporting 0/40 at 12:45 freed three hours of GPU already committed to a configuration
+that does not work.
+
+---
+
+## Documents
+
+| | |
 | --- | --- |
-| Format | VHH, scFv or Fab (paired) |
-| Antibody-ness | IMGT numbering confidence ≥ 0.1 with `immunum` |
-| Length | ≤ 250 aa total (single chain, or VH+VL combined) |
-| Cysteines | no unpaired cysteines |
-| Novelty (de novo) | domain identity < 70 % to any known antibody, ≥ 2 CDRH3 mutations |
-| Novelty (optimisation) | ≥ 3 CDRH3 mutations from **every** provided sequence; task description also asks for < 70 % CDRH3 identity to trastuzumab |
+| [`docs/SUBMISSION.md`](docs/SUBMISSION.md) | the designs, every metric, full sequences |
+| [`docs/DEVELOPABILITY.md`](docs/DEVELOPABILITY.md) | liabilities, biophysics, toxicity, thermostability, head-to-head |
+| [`docs/EFFICIENCY.md`](docs/EFFICIENCY.md) | why the filters ran in the wrong order, and the 3.3× |
+| [`docs/TOOLS.md`](docs/TOOLS.md) | every tool used — and the seven that could not be run |
+| [`docs/RUN-LOG.md`](docs/RUN-LOG.md) | every run, decision and failure, with times |
+| [`docs/agents/`](docs/agents/) | generator and evaluator specifications |
 
-`abguard` decides the track from identity over the **whole domain**, so a CDRH3-only
-redesign on trastuzumab's framework (~97 % identical) is always an optimisation design.
-It compares the IMGT CDR3 — `SRWGGDGFYAMDY`, i.e. the 10-residue window `WGGDGFYAMD`
-plus its `SR`/`Y` flanks — against a bundled reference that already contains the FACS
-and SPR tables. Being 4 mutations from trastuzumab is not enough: the loop must be
-3 mutations away from all 525,063 provided CDRH3s. A design is never moved between
-tracks; if it misses its track's criteria it is rejected.
+---
+
+## What is not measured
+
+Stated plainly because it bounds every claim above:
+
+- **Thermostability** — a judged axis. No Tm predictor was reachable; we report structural
+  correlates (VH–VL interface contacts, CDRH3 glycine content) and say so.
+- **Toxicity** — not predicted. We report the parent's *measured* FDA-label safety
+  (anti-drug antibodies 1/903, CHF 0.4–3.2 %) and absence-of-red-flag checks.
+- **Immunogenicity** — deliberately not predicted; tools in this class have limited
+  validated power.
+- **Solubility / aggregation** — none of Aggrescan3D, SoluProt, NetSolP or ProteinMPNN
+  could be run here. See `docs/TOOLS.md`.
+- **Affinity** — predicted, not measured. Calibrated against the parent, extrapolating
+  beyond the training distribution by construction, since the novelty gate forces designs
+  ≥3 mutations from every sequence the models learned from.
+
+---
 
 ## Layout
 
 ```
-data/raw/          hackathon data from s3://apheris-oslo-hackathon/data/ (not in git)
-data/docs/         RFD4-Proteina tutorial: Data/, Settings/, Scripts/, Tutorial.html
-data/processed/    parquet caches built by src/abhack/data.py
-runs/              docker run outputs: design / prepared / folded / scored (not in git)
-designs/           candidate tables and the ranked submission
-scripts/           thin shell wrappers around the Foundry docker images
-src/abhack/        python package: data, novelty, design parsing, scoring, models
-tests/             unit tests for the filter logic
-reports/           figures and notes for the pitch
+odyssey.csv                   the submission
+designs/                      tables, sequences, structures (PDB pairs per design)
+specs/                        every design spec used, version controlled
+scripts/                      design, refold, validate, structure prep, JapanFold clients
+src/abhack/                   pipeline, novelty, epitope, models, submission
+docs/                         the write-ups above
+.claude/agents/               the runnable agents
 ```
 
-## Quickstart
+`data/`, `runs/` and `models/` are gitignored — re-fetch with
+`bash scripts/fetch_data.sh small`.
 
-```bash
-uv sync                                  # create .venv from pyproject.toml
-source env.sh                            # image tags + `abrun` docker helper
-nvidia-smi                               # H100 should be visible
-
-bash scripts/fetch_data.sh small         # HER2 tables + tutorial docs (~12 MB)
-bash scripts/smoke_test.sh               # 4 designs → refold → score (~5 min)
-
-# full design run (100 designs, ~30 s each)
-WEIGHT=her2-novel N=100 SEED=1 OUT=runs/novel-s1 bash scripts/design.sh
-python -m abhack.designs collect runs/novel-s1 -o designs/novel-s1.csv
-# ONE ranking path: gates (novelty, ipae) BEFORE refolding, then a weighted
-# z-composite; see src/abhack/ranking.py for the components and why iptm is absent
-python -m abhack.ranking rank designs/novel-s1.csv -o designs/opt-ranked.csv
-# gate-first refold: only survivors, selected by the ranking — not RFD4's top-n
-python scripts/refold_gated.py runs/novel-s1 designs/opt-ranked.csv --out runs/novel-s1-gated
-OUT=runs/novel-s1-gated TOPN=<n> bash scripts/refold.sh
-# thermostability tickets: paper-validated framework twins of the top designs
-python -m abhack.tickets designs/opt-ranked.csv -n 4 -o designs/opt-tickets.csv
-# quota-merge the tracks (12 optimisation / 8 de novo default) and convert
-python -m abhack.ranking merge designs/opt-ranked.csv designs/denovo-ranked.csv -o designs/final-ranked.csv
-python -m abhack.submission build designs/final-ranked.csv --rank-by submission_order --descending -o designs/submission.csv
-bash scripts/validate.sh designs/submission.csv
-```
-
-## Optional thermal tie-break (GPU)
-
-Thermal MD is a relative unfolding screen for a complete final shortlist, not a
-Tm prediction. Current HER2 structures are paired Fvs, so the runner retains
-VL=A and VH=B while stripping HER2 C/D. It requires CUDA and refuses a silent
-CPU fallback.
-
-```bash
-uv sync
-bash scripts/run_all_thermal.sh designs/structures/*_boltz2.pdb
-python -m abhack.ranking rank designs/final-shortlist.csv -o designs/final-md-ranked.csv \
-  --thermal-results runs/thermal/thermal_scores.csv \
-  --thermal-control runs/thermal/thermal_control.csv --require-thermal
-```
-
-Use 310 K only as the `q_worst >= 0.9` gate. Use the 400 K `thermal_score` to
-re-rank screened candidates; do not attach partial MD results to the full pool.
-
-## De novo track: VHH against the trastuzumab epitope
-
-The HER2-finetuned weights only redesign CDRH3 on trastuzumab's framework, so they
-produce ~97 %-identical designs that are always optimisation. For de novo you need a
-different molecule: `antibody-2026-10-30` designing all three CDRs of a VHH, docked at
-trastuzumab's epitope. A VHH sits at ~0.65 identity to trastuzumab's VH — under the
-0.70 line, so `abguard` classes it `de_novo`, where only 2 CDRH3 mutations are needed.
-
-**Verdict, 2026-11-14: do not rerun this.** Both seeds (200 designs) refolded 0/20
-at the designed pose under Boltz-2, and the AF2-IG control — which starts from the
-designed coordinates and cannot be fooled by a missing MSA — agrees: ipTM 0.10–0.34,
-interface PAE 19–27 Å on all 40 tested (`designs/af2ig-denovo.csv`). Two independent
-architectures, same answer: well-folded nanobodies that bind somewhere else. The de
-novo track instead draws on BoltzGen (`scripts/japanfold_boltzgen.py`, off-box) with
-the same AF2-IG check (`scripts/japanfold_af2ig_boltzgen.py`); best candidate ipTM
-0.46 / PAE 16 Å — still below the credibility bar, so de novo entries are ranked
-lottery tickets for a thin track, not evidence-backed binders
-(`scripts/build_denovo_table.py` → `designs/denovo-ranked.csv`).
-
-```bash
-python scripts/build_denovo_input.py          # writes data/denovo-vhh/
-WEIGHT=antibody N=100 SEED=1 INPUT=data/denovo-vhh/design.json \
-  OUT=runs/denovo-vhh-s1 bash scripts/design.sh
-OUT=runs/denovo-vhh-s1 TOPN=20 FOLD=boltz2 WEIGHT=antibody bash scripts/refold.sh
-python -m abhack.epitope runs/denovo-vhh-s1   # is it binding where trastuzumab binds?
-python -m abhack.designs collect runs/denovo-vhh-s1 -o designs/denovo-s1.csv
-```
-
-The input folder (`scripts/build_denovo_input.py`) holds three files, per
-`data/docs/15-antibody-design.md`:
-
-| File | What |
-| --- | --- |
-| `target_her2.cif` | HER2 domain IV, chains C (489–580) + D (591–607) from the 1N8Z crop, trastuzumab's own chains dropped |
-| `framework_vhh.cif` | caplacizumab VHH framework, 83 residues with CDR gaps at 23/38/76 |
-| `design.json` | tracked in `specs/denovo-vhh/`; contig designs CDR1 13, CDR2 9–10, CDR3 12–21 |
-
-`C_HOT` pins the four HER2 atoms nearest trastuzumab's CDRH3 in 1N8Z, which is what
-makes the design compete with trastuzumab in the competitive-binding assay — the
-epitope-preservation axis. `abhack.epitope` then measures whether a design actually
-landed there: contacts within 4.5 Å, scored against the 44 HER2 residues within 10 Å
-of those hotspots.
-
-Unlike the HER2 CDRH3 exercise, `refold-score`'s `pass` column is meaningful here: a de
-novo VHH has a real designed pose, so RMSD-to-design is measurable.
-
-## Models on this VM
-
-Design (`apheris-rfd4-proteina`, tasks `design`, `refold-prepare`, `refold-score`, `metrics`, `finetune`):
-
-| Name in `env.sh` | Weight | Use |
-| --- | --- | --- |
-| `RFD4_ANTIBODY` | `antibody-2026-10-30` | any CDR / VHH / Fv on a fixed framework |
-| `RFD4_HER2` | `her2-2026-11-07` | trastuzumab CDRH3; `--sequence-tsr-k 2` balanced, `1` exploratory |
-| `RFD4_HER2_NOVEL` | `her2-novel-2026-11-09` | mostly novel CDRH3 loops, lowest interface error (6.8 Å) |
-
-Folding: `FOLD_BOLTZ2`, `FOLD_OF3OB`, `FOLD_OF3P2`, `FOLD_PROTENIX_V2`, `FOLD_PROTENIX_V1`,
-`FOLD_MOL1`, `FOLD_BOLTZ1` (no template), `FOLD_ESMFOLD2` (no template).
-
-For the HER2 example `refold-score` leaves `pass` empty (the example fixes HER2 and the
-framework relative to each other), so rank on `min_ipae` (lower better), `iptm` and
-`binder_plddt`, and only within one folding model.
-
-## Data
-
-| Path | Contents |
-| --- | --- |
-| `data/raw/her2-trastuzumab/tz_her2_facs_3classes_524346.csv.zip` | 524,346 CDRH3 variants, FACS class high/medium/low |
-| `data/raw/her2-trastuzumab/trastuzumab_her2_spr_all_768.csv` | 768 designs, 190 with KD (nM) |
-| `data/raw/zenodo-18390239-ab-ag-complexes/iptm_confidence_scores.zip` | ipTM matrices, cognate vs non-cognate — calibrate the confidence filter |
-| `data/raw/sigma2-ab-ag-champloo/spr-supplementary/` | SPR cross-reactivity tables |
-
-Both trastuzumab tables together are the "provided data" the novelty gate compares against
-(525,063 unique CDRH3s). Cite Chinery et al. when using them.
-
-## References
-
-- Task description: `ai-antibodies-hackathon-apheris.pdf`
-- Tutorial: `data/docs/Tutorial.html`, VM guide `data/docs/18-vm.md`, HER2 models `data/docs/12-her2.md`
+Data: Chinery et al. (FACS, SPR), Smorodina et al. (cognate/non-cognate ipTM),
+PDB 1N8Z and 7MN8. Compute: 1× H100 (~5 h) and $0.44 of JapanFold credit.

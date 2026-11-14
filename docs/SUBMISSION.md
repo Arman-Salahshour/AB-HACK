@@ -1,4 +1,13 @@
-# Final submission — 20 designs
+# Submission candidates
+
+> **The delivered file is [`odyssey.csv`](../odyssey.csv)** — 30 designs (24 optimisation,
+> 6 de novo), 30/30 `abguard`-valid, in the organisers' format with the `track` column.
+> It is ranked by the scheme described in `docs/EFFICIENCY.md`: structure as a gate,
+> then P(high) and predicted K_D. The 20-design table below is the earlier
+> structure-first ranking, kept because the disagreement between the two orderings is
+> itself a result.
+
+# Earlier ranking — 20 designs, structure-first
 
 > **What is new here.** The ranking disagreement is published rather than resolved. This
 > order weights structural evidence first, but the FACS classifier — trained on 524,346

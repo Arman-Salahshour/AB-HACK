@@ -55,6 +55,30 @@ pass rate approaches 100 %**, and on the optimisation track it has.
 **Rule of thumb:** spend GPU on a filter in proportion to how much it rejects. Track its
 pass rate and cut the batch size when it stops rejecting.
 
+### The ordering argument, measured
+
+The organisers supplied the dataset that settles this: Smorodina et al., 91 real
+nanobody–antigen pairs against ~8,100 shuffled ones, scored by three folding models.
+Treating ipTM as a binder classifier:
+
+| Signal | Task | AUROC | AUPRC (baseline 0.011) |
+| --- | --- | --- | --- |
+| **FACS classifier** | high vs low binder, 50,151 held out | **0.989** | 0.989 (baseline 0.515) |
+| **SPR regressor** | sub-nanomolar vs rest, out-of-fold | **0.930** | — |
+| AlphaFold3 ipTM | real vs shuffled pair | 0.754 | 0.187 |
+| Boltz-2 ipTM | real vs shuffled pair | **0.645** | **0.026** |
+| Chai-1 ipTM | real vs shuffled pair | 0.568 | 0.067 |
+
+Boltz-2 — the model our structural ranking used all afternoon — reaches 0.645, and an
+AUPRC of 0.026 against a 0.011 baseline means that in a realistic screen, where almost
+nothing binds, ipTM ranking is close to useless. The measurement-trained models are not
+marginally better; they are in a different class.
+
+This independently reproduces the published Smorodina finding and matches the Adaptyv
+competition result (ranking metrics correlate ~0.2 with outcome, vanishing within the top
+200). It is also why the final submission uses structure as a gate and ranks on P(high)
+and predicted K_D.
+
 ---
 
 ## 2. Cost model, per 100 designs
