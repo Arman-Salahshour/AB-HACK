@@ -1,7 +1,24 @@
-__pycache__/
-*.pt
-*.ckpt
-data/
-results/
 .venv/
 .env
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# large or regenerable artefacts
+data/
+results/
+runs/
+models/
+*.ckpt
+*.pt
+designs/_probe.csv
+
+# third-party material, not ours to redistribute.
+# data/ above covers the Apheris tutorial; re-fetch both with:
+#   bash scripts/fetch_data.sh small
+ai-antibodies-hackathon-apheris.pdf
+
+# superseded by src/abhack/ (empty placeholders from the skeleton commit)
+src/*.py
