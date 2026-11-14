@@ -143,6 +143,14 @@
   details.seq summary::-webkit-details-marker { display: none; }
   details.seq summary::before { content: "▸"; font-size: 10px; }
   details.seq[open] summary::before { content: "▾"; }
+  .copy {
+    font-family: var(--mono); font-size: 11px; cursor: pointer;
+    background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--rule);
+    border-radius: 4px; padding: 3px 9px; margin-left: auto;
+  }
+  .copy:hover { color: var(--accent); border-color: var(--accent); }
+  .copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .seqhead { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
   .seqbox {
     font-family: var(--mono); font-size: 12px; line-height: 1.75; word-break: break-all;
     background: var(--surface-2); border-radius: 5px; padding: 10px 12px; margin-top: 8px;
@@ -292,6 +300,7 @@
       <span class="k">${s.k}</span>
     </div>`).join("");
 
+  const VL = "DIQMTQSPSSLSASVGDRVTITCRASQDVNTAVAWYQQKPGKAPKLLIYSASFLYSGVPSRFSGSRSGTDFTLTISSLQPEDFATYYCQQHYTTPPTFGQGTKVEIK";
   const TZ = "WGGDGFYAMD";
   const diff = (loop) => [...loop].map((c, i) => c === TZ[i] ? c : `<b>${c}</b>`).join("");
 
@@ -328,10 +337,31 @@
         <div class="metric"><span class="mv">${r.kd} nM</span><span class="mk">predicted K<sub>D</sub></span></div>
       </div>
       <details class="seq">
-        <summary>heavy chain · ${r.vh.length} aa · IMGT CDR3 ${r.imgt}</summary>
-        <div class="seqlabel">VH (CDRH3 highlighted)</div>
+        <summary>sequences · VH ${r.vh.length} aa · IMGT CDR3 ${r.imgt}</summary>
+        <div class="seqhead">
+          <span class="seqlabel" style="margin-top:0">VH (CDRH3 highlighted)</span>
+          <button class="copy" data-seq="${r.vh}" data-id="${r.id}">copy VH</button>
+        </div>
         <div class="seqbox">${vhSplit(r.vh, r.cdrh3)}</div>
+        <div class="seqhead">
+          <span class="seqlabel" style="margin-top:0">VL — trastuzumab's, identical in every design</span>
+          <button class="copy" data-seq="${VL}" data-id="VL">copy VL</button>
+        </div>
+        <div class="seqbox">${VL}</div>
       </details>
     </article>`;
   }).join("");
+
+  document.addEventListener("click", async (e) => {
+    const btn = e.target.closest(".copy");
+    if (!btn) return;
+    const label = btn.textContent;
+    try {
+      await navigator.clipboard.writeText(btn.dataset.seq);
+      btn.textContent = "copied";
+    } catch {
+      btn.textContent = "select the text below";
+    }
+    setTimeout(() => { btn.textContent = label; }, 1600);
+  });
 </script>
