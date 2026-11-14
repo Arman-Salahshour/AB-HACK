@@ -311,8 +311,15 @@ is no spec fix to make on that account.
 
 ## Housekeeping
 
-- `designs/denovo-s1.csv` and `designs/denovo-vhh-s1.csv` are the **same 100 designs with
-  identical column sets** — collected twice in parallel. Delete one.
+- ~~`designs/denovo-s1.csv` and `designs/denovo-vhh-s1.csv` are the same 100 designs~~ —
+  **done, 2026-11-14**: verified identical (same 100 `design_id`s, same 111 columns) and
+  `denovo-s1.csv` deleted; `designs/denovo-vhh-s1.csv` is the one that matches its run
+  folder `runs/denovo-vhh-s1`. Recoverable from history if ever needed.
+- What `.gitignore` deliberately keeps out, so it is not re-added: `/*.pdb` and `/*.cif`
+  (structures dropped at the repo root while poking around — anything a module reads lives
+  under `data/` or `specs/`), and `designs/*.ranked.csv` (`abhack.evaluate` output, seconds
+  to redo on CPU and off the submission path). Design *tables* stay tracked — the repo is
+  what survives the VM.
 - A diagram of this pipeline, its three gates and the evidence above lives at
   **`docs/pipeline.html`** — standalone, open it in a browser, no server or build step.
   Mirrored at https://claude.ai/artifact/7EFQa8tE1fePRTgGhWH18Y (anyone with the link). The

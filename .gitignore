@@ -1,10 +1,32 @@
+# Python
 .venv/
-.env
 __pycache__/
-*.pyc
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# tool caches
 .pytest_cache/
 .ruff_cache/
+.mypy_cache/
 .ipynb_checkpoints/
+.coverage
+htmlcov/
+
+# editor / OS litter
+.DS_Store
+__MACOSX/
+*.swp
+*~
+.idea/
+.vscode/
+
+# logs and scratch output
+*.log
+nohup.out
+scratch/
+tmp/
 
 # large or regenerable artefacts
 data/
@@ -13,16 +35,33 @@ runs/
 models/
 *.ckpt
 *.pt
+*.safetensors
+*.npz
 designs/_probe.csv
+
+# `abhack.evaluate` output: the source table's columns plus p_high/pkd_pred/
+# kd_pred_nM/composite, rows minus the ones the gates drop. Seconds to redo on
+# CPU, and it is the orphaned ranking path anyway — `abhack.submission` ranks
+# the submission. Keep the design table, not its ranking.
+designs/*.ranked.csv
+
+# structures dropped at the repo root while poking at things.
+# Anything a module actually reads lives under data/ or specs/ and is
+# fetched by scripts/fetch_data.sh; public PDB entries are re-downloadable.
+/*.pdb
+/*.cif
 
 # third-party material, not ours to redistribute.
 # data/ above covers the Apheris tutorial; re-fetch both with:
 #   bash scripts/fetch_data.sh small
 ai-antibodies-hackathon-apheris.pdf
 
-# superseded by src/abhack/ (empty placeholders from the skeleton commit)
-src/*.py
-
-# never commit platform credentials (Nebius/JapanFold keys)
+# never commit platform credentials (Nebius/JapanFold keys).
+# JapanFold reads $JAPANFOLD_API_KEY or ~/japanfold/japanfold.key — both
+# outside the repo; these patterns are the backstop for a stray copy.
+.env
+.env.*
 *.private.json
 credentials*.json
+*.key
+*.pem
