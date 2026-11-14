@@ -213,7 +213,47 @@ Two caveats follow from that same fact:
 
 ---
 
-## 6. Head to head: seed 11 vs seed 21 best
+## 6. Structural stability of the designed loop
+
+`scripts/structural_stability.py`, from the Boltz-2 refold and RFD4's own metrics.
+Full table: `designs/s21-stability.csv`.
+
+| Design | CDRH3 pLDDT | framework | **gap** | loop min | buried SASA | contacts | H-bonds | salt br. |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `_11` | 98.36 | 98.59 | **0.23** | 97.0 | 714 Å² | 204 | 9 | 2 |
+| `_0` | 98.31 | 98.60 | **0.29** | 96.3 | 710 Å² | 216 | 11 | 3 |
+| `_14` | 97.99 | 98.66 | 0.68 | 96.2 | 744 Å² | 219 | 10 | 4 |
+| `_40` | 97.59 | 98.31 | 0.72 | 94.3 | 703 Å² | 192 | 12 | 2 |
+| `_28` | 97.07 | 98.58 | 1.51 | 93.6 | 749 Å² | 231 | 12 | 3 |
+| `_30` | 95.72 | 98.51 | 2.80 | 89.3 | 697 Å² | 201 | **14** | 2 |
+| `_23` | 94.86 | 98.44 | 3.58 | 86.9 | 789 Å² | 226 | 10 | 2 |
+| `_18` | 92.92 | 98.01 | 5.09 | 81.8 | 745 Å² | 196 | 11 | 3 |
+| `_16` | 91.06 | 98.39 | **7.33** | 80.5 | 777 Å² | **272** | 12 | 2 |
+| `_17` | 88.67 | 98.21 | **9.54** | **73.5** | 811 Å² | 244 | 9 | 3 |
+
+**The pLDDT gap is a discriminator nothing else caught.** The framework is uniformly
+confident (98.0–98.7) because it is trastuzumab's, unchanged. The designed loop is not:
+it ranges from 98.4 down to 88.7, and the worst residue in `_17` sits at **73.5**.
+
+A loop the folding model is unsure of is a loop that moves. These designs all passed the
+`min_ipae` and RMSD thresholds — `_16` has the *most* interface contacts of any design
+(272) and the second-largest buried surface — yet its loop is 7 pLDDT points less
+determined than its own framework. Large interface, poorly defined loop.
+
+**Interface size is consistent across all of them**: 697–811 Å² buried, 192–272
+heavy-atom contacts, 8–14 hydrogen bonds, 2–4 salt bridges. For reference, typical
+antibody–antigen interfaces bury 600–900 Å² per side, so these are normal, not
+artificially small or inflated.
+
+**CDRH3 contributes 20–33 % of interface contacts.** The rest comes from the inherited
+framework CDRs — a reminder that most of the binding energy is trastuzumab's, and the
+redesigned loop is modulating an interface it did not create.
+
+**Use the gap as a filter.** Prefer designs under ~1.5: `_11`, `_0`, `_14`, `_40`, `_28`.
+They are the ones where the model is as confident about the new loop as about the
+clinically validated framework around it.
+
+## 7. Head to head: seed 11 vs seed 21 best
 
 Every test applied to the same three molecules, with trastuzumab as reference.
 Source: `designs/head-to-head.csv`.
@@ -275,7 +315,7 @@ No single design dominates. The three are different bets:
 Submit all three near the top. The disagreement between them is information, not noise:
 if the measured-data model is right, D53 binds; if structure is right, D03 does.
 
-## 7. Recommendation
+## 8. Recommendation
 
 **If ranking on developability alone**, the picks change:
 

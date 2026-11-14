@@ -21,6 +21,8 @@ dependencies = [
     "pdbfixer>=1.9",
     "mdtraj>=1.10",
     "polars-distance>=0.5.3",
+    "propka>=3.5",
+    "pdb2pqr>=3.7",
 ]
 
 [project.optional-dependencies]
