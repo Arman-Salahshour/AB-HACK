@@ -31,19 +31,44 @@ tmp/
 # large or regenerable artefacts
 data/
 results/
-runs/
 models/
+
+# `runs/*` rather than `runs/`, so git still descends into it for the exception
+# below — it does not look inside an excluded *directory*.
+runs/*
+
+# …except BoltzGen, which ran off-box on JapanFold and is NOT reproducible on
+# this VM: 1.4 MB of designed complexes plus the job manifest. Everything else
+# under runs/ can be rebuilt from scripts/design.sh + scripts/refold.sh.
+!runs/boltzgen/
 *.ckpt
 *.pt
 *.safetensors
 *.npz
 designs/_probe.csv
 
-# `abhack.evaluate` output: the source table's columns plus p_high/pkd_pred/
-# kd_pred_nM/composite, rows minus the ones the gates drop. Seconds to redo on
-# CPU, and it is the orphaned ranking path anyway — `abhack.submission` ranks
-# the submission. Keep the design table, not its ranking.
+# Intermediates of the ranking flow. All are seconds of CPU to rebuild from the
+# design tables, which ARE tracked:
+#   abhack.ranking rank designs/opt-s*.csv -o designs/opt-ranked.csv
+#     → abhack.tickets → abhack.ranking merge
+#     → abhack.submission build → scripts/validate.sh
+# Tracked instead: the design tables themselves (`designs/opt-s*.csv`,
+# `designs/denovo-vhh-s1.csv`), the measurements that cost GPU or an off-box job
+# (`designs/epitope-*.csv`, `designs/af2ig-*.csv`), the exported structures, and
+# the one file the organisers receive, `designs/submission.csv`.
 designs/*.ranked.csv
+designs/opt-ranked.csv
+designs/*-ranked-final.csv
+designs/*-valid.csv
+designs/*-with-epitope.csv
+
+# per-seed submission drafts; the deliverable is designs/submission.csv
+designs/*-submission.csv
+designs/denovo_submission.csv
+
+# smoke-test output — scripts/smoke_test.sh remakes both in ~5 min
+designs/smoke.csv
+designs/smoke_submission.csv
 
 # structures dropped at the repo root while poking at things.
 # Anything a module actually reads lives under data/ or specs/ and is

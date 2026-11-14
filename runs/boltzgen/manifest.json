@@ -1,0 +1,74 @@
+[
+ {
+  "rank": "18",
+  "id": "8_shard-1_design_1",
+  "file": "runs/boltzgen/design/rank18_8_shard-1_design_1.cif",
+  "boltzgen_iptm": 0.31659,
+  "boltzgen_ipae": 8.8125,
+  "design_ptm": 0.70818,
+  "sequence": "EVQLVESGGGLVQAGGSLRLSEAASGFTFSNYAMAWFRQAPGKEREWVAAISSDGSYTYYADSVKGRFTISRDNAKNTLYLQMNSLKPEDTAVYYEAASYSTYWYYAAEPYLVDYWGQGTQVTVSS"
+ },
+ {
+  "rank": "12",
+  "id": "5_shard-2_design",
+  "file": "runs/boltzgen/design/rank12_5_shard-2_design.cif",
+  "boltzgen_iptm": 0.25816,
+  "boltzgen_ipae": 11.0,
+  "design_ptm": 0.71503,
+  "sequence": "EVQLVESGGGLVQAGGSLRLSEAASGFTFSSYGMGWFRQAPGKEPEGVASISSSGSSTNYADSVKGRFTISRDNSKNTVYLQMNSLRAEDTAVYYEARVYDYIVSTHKVDELPLYADYWGQGTQVTVSS"
+ },
+ {
+  "rank": "1",
+  "id": "0_shard-1_design",
+  "file": "runs/boltzgen/design/rank01_0_shard-1_design.cif",
+  "boltzgen_iptm": 0.25525,
+  "boltzgen_ipae": 10.25,
+  "design_ptm": 0.70726,
+  "sequence": "GDIVMTQSPSSLSASVGDRVTISWRASQSISSSSYLAWYQQKPGQEPKLLIYGASNLESGVPSRFSGSGSGTDFTLTISSLEAEDEAVYYAQQYDSSPPTFGGGTKVEIKSG"
+ },
+ {
+  "rank": "2",
+  "id": "1_shard-1_design_1",
+  "file": "runs/boltzgen/design/rank02_1_shard-1_design_1.cif",
+  "boltzgen_iptm": 0.21822,
+  "boltzgen_ipae": 11.8125,
+  "design_ptm": 0.74733,
+  "sequence": "QVQLVESGGGLVQPGGSLRLSEAASGFTFSNYYMHWVRQAPGKEREWVAYISSDGSYTYYADSVKGRFTISRDNAKNTLYLQMNSLRAEDTAVYYAARYYPDGLYWGQGTQVTV"
+ },
+ {
+  "rank": "3",
+  "id": "7_shard-2_design",
+  "file": "runs/boltzgen/design/rank03_7_shard-2_design.cif",
+  "boltzgen_iptm": 0.20981,
+  "boltzgen_ipae": 12.125,
+  "design_ptm": 0.72656,
+  "sequence": "EVQLVESGGGLVQPGGSLRLSEAASGFTFSSYYMGWVRQAPGKGREFVAYISSSGGSTYYADSVKGRFTISRDNAKNTLYLQMNSLKAEDTAVYYAARGNSSGGFDYWGQGTQVTVSS"
+ },
+ {
+  "rank": "16",
+  "id": "3_shard-1_design_1",
+  "file": "runs/boltzgen/design/rank16_3_shard-1_design_1.cif",
+  "boltzgen_iptm": 0.20159,
+  "boltzgen_ipae": 14.0625,
+  "design_ptm": 0.70861,
+  "sequence": "EVQLVESGGGLVQAGGSLRLSEAASGFTFSSSYMFWVRQAPGKEREFVAGISSDGSSTNYADSVKGRFTISRDNAKNTLYLQMNSLKPEDTAVYYEARQPPGGDLYWGQGTQVTVS"
+ },
+ {
+  "rank": "5",
+  "id": "7_shard-1_design_1",
+  "file": "runs/boltzgen/design/rank05_7_shard-1_design_1.cif",
+  "boltzgen_iptm": 0.19841,
+  "boltzgen_ipae": 13.75,
+  "design_ptm": 0.72294,
+  "sequence": "EVQLVESGGGLVQAGGSLRLSIAASGFTFSSYAMGWFRQAPGKEREWVAAISSSGGSTYYADSVKGRFTISRDNAKNTLYLQMNSLKPEDTAVYYEAAYRGSVATGDPSDWDYWGQGTQVTVSS"
+ },
+ {
+  "rank": "6",
+  "id": "4_shard-2_design",
+  "file": "runs/boltzgen/design/rank06_4_shard-2_design.cif",
+  "boltzgen_iptm": 0.19354,
+  "boltzgen_ipae": 14.3125,
+  "design_ptm": 0.73247,
+  "sequence": "EVQLVESGGGLVQAGGSLRLSEAASGFTFSSYGMGWFRQAPGKEREFVAAISSSGGYTYYADSVKGRFTISRDNAKNTLYLQMNSLKPEDTAVYYAAAGSSSEATSFDYWGQGTQVTVSS"
+ }
+]

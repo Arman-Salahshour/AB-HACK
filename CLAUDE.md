@@ -188,6 +188,63 @@ predictor look usable, which is the error the module exists to prevent.
 
 ## Decision log
 
+**2026-11-14, ~14:05 — de novo verdict is now definitive; ranking collapsed into `abhack.ranking`; thermostability tickets built.**
+
+Read this section before touching ranking or the de novo track; it supersedes the
+"open work" items below that it closes.
+
+- **AF2-IG killed the RFD4 de novo VHHs — two independent architectures now agree.**
+  Jobs `7ee89456272de881be571f5419355a2d` (s1, top-20 refolded) and
+  `3f80b4df3400b38a80a0c2f747820332` (s2): every design ipTM 0.10–0.34 with
+  interface PAE 19–27 Å (a real designed binder: ipTM ≥ 0.6, PAE ≤ 3 Å), while
+  binder pLDDT stays 0.89–0.93 — well-folded nanobodies, no self-consistent
+  interface. AF2-IG starts from the designed coordinates, so "Boltz-2 had no MSA"
+  no longer excuses the 0/20. Full table: `designs/af2ig-denovo.csv` (40 rows).
+  **The RFD4 `antibody-2026-10-30` de novo VHHs are dead; do not spend GPU or
+  submission slots on them.**
+- **BoltzGen (off-box, job `6c54cecb127cc6a358b5d7cb25638279`, 50-design budget,
+  20 returned)**: designed VHH/VH-like binders at the trastuzumab epitope
+  (spec 84..105). Its own scores are weak — best `design_to_target_iptm` 0.32
+  (rank 18), PAE 8.8–18 Å — and its internal quality ranking *disagrees* with
+  its interface confidence (rank 1 ≠ best ipTM). Top 8 by ipTM downloaded to
+  `runs/boltzgen/design/`, manifest in `runs/boltzgen/manifest.json`. Their CIFs
+  are whole complexes: chain A = HER2 (single chain, nothing to merge), B = binder.
+  Orthogonal AF2-IG verdict submitted as job `97e4e5662d2040b9bf1363f7dd7c49c6`
+  (`scripts/japanfold_af2ig_boltzgen.py --poll …`) — poll before giving any of
+  them a slot.
+- **One ranking path: `abhack.ranking`.** `evaluate.py` is a deprecated shim;
+  `submission.py` converts a ranked table to the abguard schema and never
+  invents an order. Gates (novelty `passes=False` out, null stays; measured
+  `min_ipae_boltz2 > 2.0` out, unmeasured stays) run **before** scoring, then a
+  weighted z-composite over `min_ipae_boltz2` (1.0, inverted), `binder_plddt`
+  (0.5), `p_high`/`pkd_pred` (1.0), `liab_cdrh3` (0.5, inverted), and AF2-IG
+  columns when present. `iptm_boltz2` is deliberately absent (calibration).
+  Unmeasured components are z=0, not null — a null propagated through the sum
+  and buried un-refolded designs regardless of their model scores.
+  `abhack.ranking merge` builds the ≤20 list with per-track quotas (default
+  12 opt / 8 de novo), spilling slots a track cannot fill.
+- **Liabilities are now parsed** (`abhack.liabilities`): local motif counts on
+  the redesigned CDRH3 window, calibrated against `abguard liability-report` on
+  a two-design probe (NG→DeAmdH, DS/DG/DT→Isom, DP→FragH, M→MetOx, N[^P][ST]→
+  Ngly; abguard counts CDR-region motifs, framework cancels across designs).
+  It is a ranking penalty only — the authority stays `abguard liability-report`.
+- **Thermostability tickets: trastuzumab VH S85N+R87T** (`abhack.tickets`).
+  Source: Ng et al., mAbs 2025, "Tuning antibody stability and function by
+  rational designs of framework mutations" (bioRxiv 2025.03.13.642419): this
+  exact double mutant raised Tm (DSF) and **retained HER2 binding and ADCC**;
+  their R50S+R59N raised Tm but lost binding, A40R+K43D had low yield — neither
+  is used. Numbering: the paper counts sequentially from the VH N-terminus —
+  position 85 = S and 87 = R in `LQMNSLRAEDTAVYYC`, **not** IMGT 85/87 (which
+  are N/A on this framework — don't re-derive this the hard way). The mutations
+  create an `NLT` glycosylation sequon: a liability flag, not a hard filter;
+  Adaptyv's cell-free expression does not glycosylate. Tickets are twins of the
+  top ranked designs (`design_id` + `-ft`), submitted *alongside* their parents.
+  Why: a CDRH3-only redesign inherits trastuzumab's Tm and can at best tie the
+  thermostability axis; S-tier needs a framework ticket.
+- Current flow: `abhack.ranking rank designs/opt-s*.csv -o designs/opt-ranked.csv`
+  → `abhack.tickets` → `abhack.ranking merge` → `abhack.submission build --rank-by
+  submission_order --descending` → `scripts/validate.sh`. Tests: 56 passing.
+
 **2026-11-14, ~12:45 — dropped the de novo VHH track, moved GPU to optimisation.**
 
 Evidence, internal:
