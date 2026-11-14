@@ -53,6 +53,8 @@ COMPONENTS: tuple[tuple[str, bool, float], ...] = (
     ("p_high", True, 1.0),
     ("pkd_pred", True, 1.0),
     ("liab_cdrh3", False, 0.5),
+    # Only include after screening a complete final shortlist (--require-thermal).
+    ("thermal_score", True, 1.0),
     ("af2ig_ipae", False, 1.0),
     ("af2ig_iptm", True, 1.0),
 )
@@ -167,7 +169,43 @@ def composite_score(df: pl.DataFrame) -> pl.DataFrame:
     )
 
 
-def rank_table(tables: list[Path | str], *, max_ipae: float | None = IPAE_GATE) -> pl.DataFrame:
+def add_thermal_scores(
+    df: pl.DataFrame, thermal_results: Path | str,
+    thermal_control: Path | str | None = None, *, require: bool = False,
+    control_q_min: float = 0.9,
+) -> pl.DataFrame:
+    """Join MD results by design_id; never treat absent MD as neutral evidence."""
+    if "design_id" not in df.columns:
+        raise ValueError("thermal ranking needs a design_id column")
+    hot = pl.read_csv(thermal_results, infer_schema_length=10_000)
+    if "design_id" not in hot.columns or "thermal_score" not in hot.columns:
+        raise ValueError("thermal results need design_id and thermal_score columns")
+    if hot["design_id"].n_unique() != hot.height:
+        raise ValueError("thermal results contain duplicate design_id values")
+    cols = [c for c in ("design_id", "thermal_score", "q_worst", "q_sd", "ss_keep", "n_unfolded") if c in hot.columns]
+    out = df.join(hot.select(cols), on="design_id", how="left")
+    if thermal_control is not None:
+        control = pl.read_csv(thermal_control, infer_schema_length=10_000)
+        if "design_id" not in control.columns or "q_worst" not in control.columns:
+            raise ValueError("thermal control needs design_id and q_worst columns")
+        if control["design_id"].n_unique() != control.height:
+            raise ValueError("thermal control contains duplicate design_id values")
+        out = out.join(control.select("design_id", pl.col("q_worst").alias("control_q_worst")), on="design_id", how="left")
+    if require:
+        missing = out.filter(pl.col("thermal_score").is_null())
+        if missing.height:
+            raise ValueError(f"{missing.height} design(s) lack thermal results; rank only a complete screened shortlist")
+        if thermal_control is not None:
+            failed = out.filter(pl.col("control_q_worst").is_null() | (pl.col("control_q_worst") < control_q_min))
+            if failed.height:
+                raise ValueError(f"{failed.height} design(s) fail or lack the 310 K control")
+    return out
+
+
+def rank_table(tables: list[Path | str], *, max_ipae: float | None = IPAE_GATE,
+               thermal_results: Path | str | None = None,
+               thermal_control: Path | str | None = None,
+               require_thermal: bool = False) -> pl.DataFrame:
     """Collect design tables -> gate -> score -> one ranked table."""
     frames = [
         pl.read_csv(t, infer_schema_length=10_000).with_columns(source=pl.lit(str(t)))
@@ -176,6 +214,10 @@ def rank_table(tables: list[Path | str], *, max_ipae: float | None = IPAE_GATE) 
     df = pl.concat(frames, how="diagonal_relaxed")
     df = gate(df, max_ipae=max_ipae)
     df = add_liabilities(add_model_scores(df))
+    if thermal_results:
+        df = add_thermal_scores(df, thermal_results, thermal_control, require=require_thermal)
+    elif require_thermal:
+        raise ValueError("--require-thermal requires --thermal-results")
     return composite_score(df)
 
 
@@ -236,6 +278,9 @@ def main() -> None:  # pragma: no cover - thin CLI
     r.add_argument("-o", "--output", required=True)
     r.add_argument("--max-ipae", type=float, default=IPAE_GATE)
     r.add_argument("--no-ipae-gate", action="store_true")
+    r.add_argument("--thermal-results", help="400 K thermal_scores.csv for a complete shortlist")
+    r.add_argument("--thermal-control", help="310 K thermal_control.csv")
+    r.add_argument("--require-thermal", action="store_true", help="reject missing MD or failed 310 K controls")
 
     m = sub.add_parser("merge", help="quota-merge two ranked tables")
     m.add_argument("opt")
@@ -249,6 +294,9 @@ def main() -> None:  # pragma: no cover - thin CLI
         df = rank_table(
             args.tables,
             max_ipae=None if args.no_ipae_gate else args.max_ipae,
+            thermal_results=args.thermal_results,
+            thermal_control=args.thermal_control,
+            require_thermal=args.require_thermal,
         )
         Path(args.output).parent.mkdir(parents=True, exist_ok=True)
         df.write_csv(args.output)

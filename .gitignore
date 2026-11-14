@@ -31,7 +31,14 @@ tmp/
 # large or regenerable artefacts
 data/
 results/
-models/
+
+# Same `dir/*` trick as runs/ below. The two baselines were trained on this VM
+# and feed `p_high`/`pkd_pred` into the ranking composite, so the ranking is not
+# reproducible without them — 3.6 MB, worth keeping. `abhack.train` rebuilds
+# them, but only after scripts/fetch_data.sh restores data/raw. Weights bigger
+# than a joblib (checkpoints, safetensors) stay out; see the patterns below.
+models/*
+!models/*.joblib
 
 # `runs/*` rather than `runs/`, so git still descends into it for the exception
 # below — it does not look inside an excluded *directory*.
@@ -57,7 +64,7 @@ designs/_probe.csv
 # (`designs/epitope-*.csv`, `designs/af2ig-*.csv`), the exported structures, and
 # the one file the organisers receive, `designs/submission.csv`.
 designs/*.ranked.csv
-designs/opt-ranked.csv
+designs/*-ranked.csv
 designs/*-ranked-final.csv
 designs/*-valid.csv
 designs/*-with-epitope.csv

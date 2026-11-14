@@ -17,6 +17,9 @@ dependencies = [
     "tqdm>=4.66",
     "typer>=0.15",
     "immunum==2.0.0",
+    "openmm>=8.2",
+    "pdbfixer>=1.9",
+    "mdtraj>=1.10",
 ]
 
 [project.optional-dependencies]

@@ -55,9 +55,18 @@ bash scripts/smoke_test.sh               # 4 designs → refold → score (~5 mi
 
 # full design run (100 designs, ~30 s each)
 WEIGHT=her2-novel N=100 SEED=1 OUT=runs/novel-s1 bash scripts/design.sh
-OUT=runs/novel-s1 TOPN=20 bash scripts/refold.sh
 python -m abhack.designs collect runs/novel-s1 -o designs/novel-s1.csv
-python -m abhack.submission build designs/*.csv -o designs/submission.csv
+# ONE ranking path: gates (novelty, ipae) BEFORE refolding, then a weighted
+# z-composite; see src/abhack/ranking.py for the components and why iptm is absent
+python -m abhack.ranking rank designs/novel-s1.csv -o designs/opt-ranked.csv
+# gate-first refold: only survivors, selected by the ranking — not RFD4's top-n
+python scripts/refold_gated.py runs/novel-s1 designs/opt-ranked.csv --out runs/novel-s1-gated
+OUT=runs/novel-s1-gated TOPN=<n> bash scripts/refold.sh
+# thermostability tickets: paper-validated framework twins of the top designs
+python -m abhack.tickets designs/opt-ranked.csv -n 4 -o designs/opt-tickets.csv
+# quota-merge the tracks (12 optimisation / 8 de novo default) and convert
+python -m abhack.ranking merge designs/opt-ranked.csv designs/denovo-ranked.csv -o designs/final-ranked.csv
+python -m abhack.submission build designs/final-ranked.csv --rank-by submission_order --descending -o designs/submission.csv
 bash scripts/validate.sh designs/submission.csv
 ```
 
@@ -68,6 +77,17 @@ produce ~97 %-identical designs that are always optimisation. For de novo you ne
 different molecule: `antibody-2026-10-30` designing all three CDRs of a VHH, docked at
 trastuzumab's epitope. A VHH sits at ~0.65 identity to trastuzumab's VH — under the
 0.70 line, so `abguard` classes it `de_novo`, where only 2 CDRH3 mutations are needed.
+
+**Verdict, 2026-11-14: do not rerun this.** Both seeds (200 designs) refolded 0/20
+at the designed pose under Boltz-2, and the AF2-IG control — which starts from the
+designed coordinates and cannot be fooled by a missing MSA — agrees: ipTM 0.10–0.34,
+interface PAE 19–27 Å on all 40 tested (`designs/af2ig-denovo.csv`). Two independent
+architectures, same answer: well-folded nanobodies that bind somewhere else. The de
+novo track instead draws on BoltzGen (`scripts/japanfold_boltzgen.py`, off-box) with
+the same AF2-IG check (`scripts/japanfold_af2ig_boltzgen.py`); best candidate ipTM
+0.46 / PAE 16 Å — still below the credibility bar, so de novo entries are ranked
+lottery tickets for a thin track, not evidence-backed binders
+(`scripts/build_denovo_table.py` → `designs/denovo-ranked.csv`).
 
 ```bash
 python scripts/build_denovo_input.py          # writes data/denovo-vhh/
