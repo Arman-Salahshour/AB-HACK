@@ -102,41 +102,105 @@ free thiol. This is a hard filter and all designs pass.
 
 ---
 
-## 4. Toxicity
+## 4. Predicted binding
 
-**Not predictable from sequence, and not claimed here.** The strongest available argument
-is structural: every design is trastuzumab's framework with ten CDRH3 positions changed,
-and the light chain is trastuzumab's unchanged. The scaffold is that of a drug approved
-by FDA and EMA since 1998 and marketed as at least eight products.
+From the two models trained on this exact system. Full table:
+`designs/s21-full-panel.csv`.
 
-Two caveats that follow from the same fact:
+| Design | CDRH3 | P(high binder) | pred K_D | epitope | min_ipae | RMSD |
+| --- | --- | --- | --- | --- | --- | --- |
+| ***trastuzumab*** | WGGDGFYAMD | **0.995** | **0.22 nM** | – | – | – |
+| D12 | STSSVGWAFD | 0.689 | 143.8 nM | 18 | 0.335 | 0.89 Å |
+| D02 | WASLYEYYFD | 0.583 | 68.9 nM | **20** | 0.301 | 0.99 Å |
+| D11 | WTSSVDYAHD | 0.565 | 28.1 nM | 18 | 0.316 | 0.98 Å |
+| D01 | WSFSVDYAFD | 0.485 | 95.2 nM | **20** | 0.337 | 0.84 Å |
+| **D03** | **WASSYYYYFD** | 0.454 | **5.9 nM** | **20** | 0.314 | **0.70 Å** |
+| D04 | YASSYDYYFD | 0.419 | 51.7 nM | 19 | 0.328 | 0.78 Å |
+| D07 | STSAVDYAFD | 0.248 | 196.1 nM | 18 | 0.329 | 0.70 Å |
+| D10 | WHSLYYYYFD | 0.121 | 13.9 nM | 18 | 0.318 | 0.78 Å |
+| D05 | WASHYDYYFD | 0.113 | 85.6 nM | 19 | 0.310 | 0.88 Å |
+| D06 | ATRAVDYAFD | 0.108 | 213.1 nM | 19 | 0.313 | 0.91 Å |
+| D08 | WNYAYDYAMD | 0.063 | 23.2 nM | 18 | 0.314 | 0.68 Å |
+| D09 | STLSVSYAFD | 0.034 | 255.1 nM | 18 | 0.295 | 0.85 Å |
+
+**The parent is the positive control, and the models pass it.** Run on trastuzumab's own
+CDRH3 they return P(high) = 0.995 and K_D 0.22 nM against a measured 0.029–0.178 nM —
+accurate on the one sequence whose answer is known. That makes the rest of the column
+worth reading, and the reading is sobering: **no design comes close.** The best predicted
+affinity is 27× weaker than the parent, and every P(high) is below 0.70 against 0.995.
+
+Note also that the models and the structure disagree. `min_ipae` and RMSD are tightly
+clustered across all twelve (0.29–0.34, 0.68–0.99 Å) while P(high) spans 0.03 to 0.69.
+Structure prediction cannot separate these designs; the sequence models can, and they
+were trained on measured binding. Where they conflict, prefer the measured-data model.
+
+### A data-integrity note
+
+Ten of the refolded designs share a CDRH3 with another sample. The same loop can come
+back with different poses — `WASSYYYYFD` appears as both `_30` (14 epitope contacts,
+1.16 Å) and `_94` (20 contacts, 0.70 Å). The table above keeps the best-posed sample per
+loop. An earlier version of this panel joined on CDRH3 and silently picked an arbitrary
+one, which understated D03.
+
+---
+
+## 5. Toxicity
+
+**Not predictable from sequence, and not claimed here.** What can be checked, was:
+
+| Flag | Result |
+| --- | --- |
+| N-linked glycosylation sequons (N-X-S/T) | **0** in all designs and in trastuzumab |
+| RGD integrin-binding motif | **absent** in all |
+| Free (unpaired) cysteine | **none**; 4 Cys, 2 disulfides, in all |
+| CDR positive charge (polyreactivity / fast-clearance proxy) | **2–3**, same as trastuzumab's 2 |
+| CDR net charge | −1 to −2, same as trastuzumab's −2 |
+
+Low positive charge across the CDRs is the useful one: high positive CDR charge is
+associated with polyreactivity and rapid clearance, and these designs sit exactly where
+the parent does.
+
+**The structural argument.** Every design is trastuzumab's framework with ten CDRH3
+positions changed and the light chain unchanged — the scaffold of a drug approved by FDA
+and EMA since 1998 and marketed as at least eight products.
+
+Two caveats follow from that same fact:
 
 - **Trastuzumab's known class toxicity is cardiac** (left-ventricular dysfunction),
   target-mediated through HER2 in cardiomyocytes. Designs binding the same domain IV
   epitope would be expected to share it.
-- **A changed CDRH3 is a new antigenic determinant.** Immunogenicity risk cannot be
-  inferred from the parent and needs its own assessment.
+- **A changed CDRH3 is a new antigenic determinant.** Immunogenicity cannot be inferred
+  from the parent. Assessing it needs MHC-II binding prediction (NetMHCIIpan) or an
+  ADA assay — neither available here.
 
 ---
 
-## 5. Recommendation
+## 6. Recommendation
 
 **If ranking on developability alone**, the picks change:
 
-| Rank | Design | CDRH3 | Case |
-| --- | --- | --- | --- |
-| 1 | **D06** | ATRAVDYAFD | no CDRH3 liability, best instability index (36.6), fewest total liabilities |
-| 2 | **D09** | STLSVSYAFD | no CDRH3 liability, least hydrophobic (GRAVY −0.296) |
-| 3 | **D04** | YASSYDYYFD | no CDRH3 liability, 4 Trp vs trastuzumab's 5 |
+| Rank | Design | CDRH3 | Developability case | but P(high) |
+| --- | --- | --- | --- | --- |
+| 1 | **D06** | ATRAVDYAFD | no CDRH3 liability, best instability index (36.6) | 0.108 |
+| 2 | **D09** | STLSVSYAFD | no CDRH3 liability, least hydrophobic (−0.296) | **0.034** |
+| 3 | **D04** | YASSYDYYFD | no CDRH3 liability, 4 Trp vs trastuzumab's 5 | 0.419 |
 
-**But these are not the structurally best designs.** D03 (`WASSYYYYFD`) leads on
-interface and predicted affinity (20/22 epitope contacts, precision 1.00, predicted
-K_D 5.9 nM) and carries a CDRH3 Trp oxidation site.
+**The three cleanest designs are also among the weakest predicted binders.** D09 has no
+liability in CDRH3 and the lowest P(high) of all twelve, 0.034. A clean molecule that
+does not bind is worth nothing, so developability cannot lead the ranking.
 
-That is a genuine trade-off, not a ranking error: the binding evidence favours D03, the
-developability evidence favours D06/D09. With 20 submission slots, submit both groups —
-and note that the Trp risk is mitigable through distal framework charge changes without
-touching CDRH3 or the novelty gate.
+**The best overall compromise is D03 (`WASSYYYYFD`)**: 20 epitope contacts at precision
+1.00, tightest structure agreement (0.70 Å), best predicted affinity by 2.4× (5.9 nM),
+mid-range P(high) 0.454 — carrying one CDRH3 Trp oxidation flag, as trastuzumab does.
+
+**D04 (`YASSYDYYFD`) is the one design that is strong on both**: no CDRH3 liability at
+all, 19 epitope contacts, 0.78 Å, P(high) 0.419, 51.7 nM. It gives up ~9× predicted
+affinity against D03 to remove the Trp risk entirely.
+
+Suggested split of the 20 slots: lead with D03 and D04, carry D02/D01/D11 on binding
+evidence, and include D06/D09 as developability-first entries. The Trp risk in the
+first group is mitigable through distal framework charge changes, which the novelty
+gate does not inspect.
 
 ---
 

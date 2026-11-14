@@ -39,9 +39,8 @@ metrics, table = sys.argv[1], sys.argv[2]
 s = pl.read_csv(metrics)
 keep = {c: f"{c}_boltz2" for c in ("min_ipae", "iptm", "binder_plddt") if c in s.columns}
 sdf = s.select(["query_id", *keep]).rename({"query_id": "design_id", **keep})
-t = pl.read_csv(table, infer_schema_length=10_000).drop(
-    [c for c in keep.values() if c in t.columns]
-)
+t = pl.read_csv(table, infer_schema_length=10_000)
+t = t.drop([c for c in keep.values() if c in t.columns])
 t.join(sdf, on="design_id", how="left").write_csv(table)
 PY
 done

@@ -198,6 +198,33 @@ predictor look usable, which is the error the module exists to prevent.
 
 ## Decision log
 
+**2026-11-14, ~15:00 — `designs/submission.csv` final: 20/20 valid, 12 optimisation / 8 de novo.**
+
+Built by `bash scripts/final_submission.sh` (the canonical one-command pipeline):
+gated-refold metrics joined in, `abhack.ranking` composite, `abhack.tickets`
+twins, quota merge, `abhack.submission` schema, `abguard team-validate`
+**20/20 valid** — rerun that script, not the individual steps, if anything
+upstream changes.
+
+The 12 optimisation slots (all templated Boltz-2 refolds, `min_ipae` 0.29–0.35 Å,
+binder pLDDT 97–98.6, FACS p_high in the description):
+
+| rows | design |
+| --- | --- |
+| D01–D08 | four parent + S85N+R87T twin pairs: WPSGGTYGYD, WYGRGWYVPD, YMSLYYYAFD, TTSSVGYAHD |
+| D09–D12 | YASSSDYYFD, WKGPDLYYFA, YMSLYYYEFD, YAGQGFGSYE |
+
+The twins are ranked by their parent's evidence (identical CDRH3) — the framework
+pair is the S-tier play, so parents stay in the list as the low-risk controls.
+
+The 8 de novo slots are evidence-ranked lottery tickets, all that survived two
+generators × two independent scoring architectures (best AF2-IG ipTM 0.46 /
+PAE 16 Å vs a real-binder bar of 0.6 / 3 Å): D13 BoltzGen rank18, D14 RFD4-s1
+#15, D15 BoltzGen rank12, then the next five by AF2-IG. De novo ordering within
+the 20 is last — with the base-4 allocation only optimisation rows are tested;
+de novo rows get made if the pitch wins extra slots, which is exactly the
+intended exposure profile.
+
 **2026-11-14, ~14:20 — local novelty mirror was too permissive: Hamming vs Levenshtein.**
 
 `abguard team-validate` rejected `WSSAVGYAMD` (2 Levenshtein mutations from the

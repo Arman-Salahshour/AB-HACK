@@ -93,14 +93,17 @@ def to_submission(
     def describe(row: dict) -> str:
         if description:
             return description
-        bits = [f"{row.get('weight', 'rfd4')}"]
+        bits = [str(row.get("weight") or "rfd4")]
+        if row.get("framework_ticket"):
+            bits.append("fw S85N+R87T (Ng mAbs 2025: +Tm, binding retained)")
         if row.get("track"):
             bits.append(str(row["track"]))
         if row.get("cdrh3"):
             bits.append(f"CDRH3={row['cdrh3']}")
         elif row.get("cdr3_imgt"):
             bits.append(f"CDR3={row['cdr3_imgt']}")
-        for col in ("min_ipae_boltz2", "binder_plddt_boltz2", "epitope_fraction"):
+        for col in ("min_ipae_boltz2", "binder_plddt_boltz2", "epitope_fraction",
+                    "p_high", "af2ig_iptm", "af2ig_ipae"):
             if row.get(col) is not None:
                 bits.append(f"{col}={row[col]:.3g}")
         return "; ".join(bits)
