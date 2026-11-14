@@ -57,11 +57,19 @@ COMPONENTS: tuple[tuple[str, bool, float], ...] = (
     ("thermal_score", True, 1.0),
     ("af2ig_ipae", False, 1.0),
     ("af2ig_iptm", True, 1.0),
-    # pH selectivity, log10 K(6.5)/K(7.4) from propka proton linkage (abhack.phscore); positive = binds better
-    # in tumour-pH. Only present when --ph-scores is given; absent columns are skipped, not zeroed.
-    ("ph_log10_sel", True, 1.0),
-    ("ph_md_dq", True, 0.5),
+    # pH credit: propka selectivity, earned only when two-pH MD agrees (see add_ph_scores).
+    ("ph_credit", True, 1.0),
 )
+
+#: pH gate (hard): a *measured* propka selectivity log10 K(6.5)/K(7.4) below this is out, i.e. a design
+#: that binds better at plasma/heart pH (7.4) than at tumour pH (6.5). Null = unscored, stays.
+PH_MIN_SELECTIVITY = 0.0
+#: selectivity a design needs before MD agreement can earn it credit (about 2x).
+PH_CREDIT_MIN = 0.3
+#: credit needs the MD contact-retention gap to exceed this many control-replica spreads.
+PH_MD_SIGMAS = 2.0
+#: floor for the control spread: two replicas cannot define a tight noise band.
+PH_MD_NOISE_FLOOR = 0.02
 
 
 def _as_bool(df: pl.DataFrame, column: str) -> pl.Series:
@@ -130,7 +138,7 @@ def _zscore(s: pl.Series, higher_is_better: bool) -> pl.Series:
     return (z if higher_is_better else -z).fill_null(0.0)
 
 
-def gate(df: pl.DataFrame, *, max_ipae: float | None = IPAE_GATE) -> pl.DataFrame:
+def gate(df: pl.DataFrame, *, max_ipae: float | None = IPAE_GATE, ph_min: float | None = None) -> pl.DataFrame:
     """Drop what the gates reject. Nulls are *undecided*, never dropped.
 
     * novelty: ``passes`` false -> out (the local check is a strict subset of
@@ -145,9 +153,12 @@ def gate(df: pl.DataFrame, *, max_ipae: float | None = IPAE_GATE) -> pl.DataFram
     if max_ipae is not None and "min_ipae_boltz2" in df.columns:
         ipae = pl.col("min_ipae_boltz2").cast(pl.Float64, strict=False)
         df = df.filter(ipae.is_null() | (ipae <= max_ipae))
+    if ph_min is not None and "ph_log10_sel" in df.columns:
+        sel = pl.col("ph_log10_sel").cast(pl.Float64, strict=False)
+        df = df.filter(sel.is_null() | (sel >= ph_min))
     dropped = before - df.height
     if dropped:
-        print(f"gates: dropped {dropped} of {before} (novelty/ipae)")
+        print(f"gates: dropped {dropped} of {before} (novelty/ipae/pH)")
     return df
 
 
@@ -206,26 +217,44 @@ def add_thermal_scores(
     return out
 
 
+def control_md_noise(md: pl.DataFrame, control: str = "ctrl") -> float:
+    """Pooled within-pH spread of the control's interface retention, floored."""
+    c = md.filter(pl.col("design") == control)
+    sds = [g["q_interface"].std() for _, g in c.group_by("ph") if g.height > 1]
+    sds = [s for s in sds if s is not None]
+    return max(float(sum(sds) / len(sds)) if sds else 0.0, PH_MD_NOISE_FLOOR)
+
+
 def add_ph_scores(df: pl.DataFrame, ph_scores: Path | str, ph_md: Path | str | None = None) -> pl.DataFrame:
-    """Join pH selectivity by design_id. Optional MD summary adds dQ = Q(6.5) - Q(7.4)."""
+    """Join pH selectivity by design_id and compute ``ph_credit``.
+
+    ``ph_log10_sel`` (propka) feeds the gate. ``ph_credit`` feeds the composite and is nonzero only when
+    propka reaches :data:`PH_CREDIT_MIN` *and* the MD gap dQ = Q(6.5) - Q(7.4) exceeds
+    :data:`PH_MD_SIGMAS` control spreads in the same direction. One signal alone earns nothing.
+    """
     ph = pl.read_csv(ph_scores, infer_schema_length=10_000)
     if "design_id" not in ph.columns or "ph_log10_sel" not in ph.columns:
         raise ValueError("pH scores need design_id and ph_log10_sel columns")
     if ph["design_id"].n_unique() != ph.height:
         raise ValueError("pH scores contain duplicate design_id values")
     out = df.join(ph.select("design_id", "ph_log10_sel"), on="design_id", how="left")
+    credit = pl.lit(0.0)
     if ph_md is not None:
         md = pl.read_csv(ph_md, infer_schema_length=10_000)
         piv = (md.group_by("design", "ph").agg(pl.col("q_interface").mean())
                  .pivot(on="ph", index="design", values="q_interface"))
         if {"6.5", "7.4"} <= {str(c) for c in piv.columns}:
+            noise = control_md_noise(md)
             piv = piv.select(pl.col("design").alias("design_id"), (pl.col("6.5") - pl.col("7.4")).alias("ph_md_dq"))
             out = out.join(piv, on="design_id", how="left")
-    return out
+            agree = (pl.col("ph_log10_sel") >= PH_CREDIT_MIN) & (pl.col("ph_md_dq") > PH_MD_SIGMAS * noise)
+            credit = pl.when(agree.fill_null(False)).then(pl.col("ph_log10_sel")).otherwise(0.0)
+    return out.with_columns(ph_credit=credit)
 
 
 def rank_table(tables: list[Path | str], *, max_ipae: float | None = IPAE_GATE,
                ph_scores: Path | str | None = None, ph_md: Path | str | None = None,
+               ph_min: float | None = PH_MIN_SELECTIVITY,
                thermal_results: Path | str | None = None,
                thermal_control: Path | str | None = None,
                require_thermal: bool = False) -> pl.DataFrame:
@@ -235,14 +264,14 @@ def rank_table(tables: list[Path | str], *, max_ipae: float | None = IPAE_GATE,
         for t in tables
     ]
     df = pl.concat(frames, how="diagonal_relaxed")
-    df = gate(df, max_ipae=max_ipae)
+    if ph_scores:
+        df = add_ph_scores(df, ph_scores, ph_md)
+    df = gate(df, max_ipae=max_ipae, ph_min=ph_min if ph_scores else None)
     df = add_liabilities(add_model_scores(df))
     if thermal_results:
         df = add_thermal_scores(df, thermal_results, thermal_control, require=require_thermal)
     elif require_thermal:
         raise ValueError("--require-thermal requires --thermal-results")
-    if ph_scores:
-        df = add_ph_scores(df, ph_scores, ph_md)
     return composite_score(df)
 
 
@@ -310,6 +339,10 @@ def main() -> None:  # pragma: no cover - thin CLI
     r.add_argument("--ph-scores", help="designs/ph-*.csv with design_id, ph_log10_sel (6.5 vs 7.4)")
     r.add_argument("--ph-md", help="runs/phmd/ph_md_summary.csv from scripts/analyze_ph_md.py")
 
+    r.add_argument("--ph-min", type=float, default=PH_MIN_SELECTIVITY,
+                   help="pH gate: drop designs with propka selectivity below this (default 0.0)")
+    r.add_argument("--no-ph-gate", action="store_true")
+
     m = sub.add_parser("merge", help="quota-merge two ranked tables")
     m.add_argument("opt")
     m.add_argument("denovo")
@@ -324,6 +357,7 @@ def main() -> None:  # pragma: no cover - thin CLI
             max_ipae=None if args.no_ipae_gate else args.max_ipae,
             ph_scores=args.ph_scores,
             ph_md=args.ph_md,
+            ph_min=None if args.no_ph_gate else args.ph_min,
             thermal_results=args.thermal_results,
             thermal_control=args.thermal_control,
             require_thermal=args.require_thermal,

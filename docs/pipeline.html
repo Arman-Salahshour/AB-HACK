@@ -137,7 +137,8 @@
       Six stages from a design spec to twenty designs Adaptyv can order. Three gates
       decide what survives: novelty and measured confidence are enforced before ranking;
       developability is only partly covered (liability penalty and framework tickets,
-      no solubility or aggregation predictors yet).
+      no solubility or aggregation predictors yet). A fourth question is now scored but
+      not yet enforced: does the design bind at tumour pH (6.5) and less at plasma pH (7.4)?
     </p>
   </header>
 
@@ -277,6 +278,11 @@
               <td class="m">framework tickets VH S85N+R87T (literature, not measured here)<br>CDRH3 liability penalty<br>thermal MD screen: tested, not yet run</td>
               <td><span class="chip c-partial">proxy only</span></td>
             </tr>
+            <tr>
+              <td>pH selectivity (6.5 vs 7.4)</td>
+              <td class="m">propka proton linkage, all 20 submitted designs<br>two-pH complex MD: control only so far</td>
+              <td><span class="chip c-partial">scored, not enforced</span></td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -386,13 +392,82 @@
   </section>
 
   <section>
+    <h2>pH selectivity: bind at tumour pH, less at plasma pH</h2>
+    <p>
+      Trastuzumab's known class toxicity is cardiac, and it is target-mediated, so any design that
+      keeps the domain IV epitope inherits it. The one lever in this pipeline aimed at that is
+      conditional binding: stronger at tumour pH (6.5) than at plasma pH (7.4). Nothing below is
+      measured; the judged assay is not documented as pH-controlled, so it may not reward this.
+    </p>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>Stage</th><th>What it does</th><th>State</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="m">ph_interface.py</td>
+            <td>Maps paratope residues that touch or sit within 7 &Aring; of a HER2 carboxylate (Glu558, Asp560, Asp570, Asp596, Glu598)</td>
+            <td><span class="chip c-ok">done</span></td>
+          </tr>
+          <tr>
+            <td class="m">phswitch.py</td>
+            <td>300 histidine-switch candidates with a novel CDRH3 (the novelty gate needs one) and 1&ndash;5 His at the contact core and paratope</td>
+            <td><span class="chip c-ok">done</span></td>
+          </tr>
+          <tr>
+            <td class="m">phscore.py</td>
+            <td>Propka on the complex and the free Fv; predicted log10 K(6.5) &minus; log10 K(7.4) summed over every titratable group. Trastuzumab control: 0.00</td>
+            <td><span class="chip c-ok">done</span></td>
+          </tr>
+          <tr>
+            <td class="m">run_ph_md.py</td>
+            <td>Fv + HER2 complex MD at each pH; each His protonated with probability set by its bound-state pKa; interface contact retention</td>
+            <td><span class="chip c-partial">3 control runs, batch stopped</span></td>
+          </tr>
+          <tr>
+            <td class="m">abhack.ranking</td>
+            <td><code>--ph-scores</code> and <code>--ph-md</code> add two optional composite terms (weights 1.0 and 0.5); absent columns are skipped</td>
+            <td><span class="chip c-partial">wired, not applied to the submission</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:14px">
+      <strong>What the scoring found.</strong> Among the 20 submitted designs, 3 reach +0.3
+      (about 2&times;), 4 reach +0.1, and 14 are at or above zero. The signal in the submitted
+      designs comes from CDRH3 acids shifting up, not from histidines. Of the 300 histidine
+      candidates, 2 reach +0.3 and 40 are at or above zero; the best is +0.56 (about 3.6&times;).
+      Interface histidines usually lose protonation on binding, so a real switch needs one whose
+      pKa an acid partner pushes toward 7. The de novo design that scores highest has a likely
+      wrong pose (AF2-IG ipTM 0.32), so its score does not count.
+    </p>
+    <p>
+      <strong>Proposed rule, not yet applied.</strong> Remove designs with a negative selectivity
+      (they bind better at high pH), which drops 6 of the current 20. Give pH credit only when
+      propka reaches +0.3 <em>and</em> the MD contact-retention gap exceeds twice the control's
+      replica spread in the same direction. A gate at +0.3 alone would leave 3 designs and could
+      not fill 20 slots. The ranking order stays: measured-data binding models first, then framework
+      stability, then pH, then developability.
+    </p>
+    <p>
+      <strong>Caveats.</strong> Propka is off by about one pKa unit and the candidates are threaded
+      onto the 1N8Z crystal, not refolded. A 1 ns MD at fixed protonation states is a sanity
+      check, not evidence. HER2's own histidines are protonated at 6.5 and neutral at 7.4, which
+      adds a real antigen-side difference to every comparison.
+    </p>
+  </section>
+
+  <section>
     <h2>Open gaps</h2>
     <ul>
       <li>Thermostability is a third of the result and has only proxies: two literature framework
         mutations (S85N+R87T, which also creates an NLT glycosylation sequon, flagged and not
         filtered) and a CDRH3 liability penalty. Aggrescan3D, SoluProt, NetSolP and TAP-style
         developability checks are not installed. The thermal MD screen passed a plumbing test on one
-        trastuzumab structure (0.05 ns) but has no baseline or shortlist results.</li>
+        trastuzumab structure (0.05 ns) but has no baseline or shortlist results. NetMHCIIpan on the
+        changed CDRH3 is the only immunogenicity check that would discriminate between these designs;
+        humanness scores barely would, since the framework is shared.</li>
       <li><code>epitope_fraction</code> discriminates as a measurement (37 of 100 de novo
         designs below 1.0) but did <em>not</em> predict docking success on the refolded set, so
         it measures the judged axis and is not a binding predictor.</li>
@@ -404,7 +479,7 @@
   </section>
 
   <p class="foot">
-    Repo <code>/home/hackathon/ab-hack</code> · 58 tests passing · calibration in
+    Repo <code>/home/hackathon/ab-hack</code> · 64 tests passing · calibration in
     <code>reports/calibration.md</code> · thresholds and verified behaviour in
     <code>CLAUDE.md</code>. Figures reflect the state at 14 Nov 2026, mid-afternoon (after the AF2-IG, BoltzGen and gate-first refold work).
   </p>
