@@ -1,0 +1,9 @@
+python scripts/run_thermal.py --pdb runs/thermal-poc/inputs/trastuzumab_ref.pdb --out runs/thermal-poc/trastuzumab_ref_T310_r1 --design-id trastuzumab_ref --binder-chains A\,B --format fv --temp 310 --ns 1 --seed 1 
+python scripts/run_thermal.py --pdb runs/thermal-poc/inputs/trastuzumab_ref.pdb --out runs/thermal-poc/trastuzumab_ref_T400_r1 --design-id trastuzumab_ref --binder-chains A\,B --format fv --temp 400 --ns 3 --seed 1 
+python scripts/run_thermal.py --pdb runs/thermal-poc/inputs/trastuzumab_ref.pdb --out runs/thermal-poc/trastuzumab_ref_T400_r2 --design-id trastuzumab_ref --binder-chains A\,B --format fv --temp 400 --ns 3 --seed 2 
+python scripts/run_thermal.py --pdb runs/thermal-poc/inputs/her2_cdrh3_28.pdb --out runs/thermal-poc/her2_cdrh3_28_T310_r1 --design-id her2_cdrh3_28 --binder-chains A\,B --format fv --temp 310 --ns 1 --seed 1 
+python scripts/run_thermal.py --pdb runs/thermal-poc/inputs/her2_cdrh3_28.pdb --out runs/thermal-poc/her2_cdrh3_28_T400_r1 --design-id her2_cdrh3_28 --binder-chains A\,B --format fv --temp 400 --ns 3 --seed 1 
+python scripts/run_thermal.py --pdb runs/thermal-poc/inputs/her2_cdrh3_28.pdb --out runs/thermal-poc/her2_cdrh3_28_T400_r2 --design-id her2_cdrh3_28 --binder-chains A\,B --format fv --temp 400 --ns 3 --seed 2 
+python scripts/run_thermal.py --pdb runs/thermal-poc/inputs/her2_cdrh3_28-ft.pdb --out runs/thermal-poc/her2_cdrh3_28-ft_T310_r1 --design-id her2_cdrh3_28-ft --binder-chains A\,B --format fv --temp 310 --ns 1 --seed 1 
+python scripts/run_thermal.py --pdb runs/thermal-poc/inputs/her2_cdrh3_28-ft.pdb --out runs/thermal-poc/her2_cdrh3_28-ft_T400_r1 --design-id her2_cdrh3_28-ft --binder-chains A\,B --format fv --temp 400 --ns 3 --seed 1 
+python scripts/run_thermal.py --pdb runs/thermal-poc/inputs/her2_cdrh3_28-ft.pdb --out runs/thermal-poc/her2_cdrh3_28-ft_T400_r2 --design-id her2_cdrh3_28-ft --binder-chains A\,B --format fv --temp 400 --ns 3 --seed 2 
