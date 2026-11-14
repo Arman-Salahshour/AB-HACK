@@ -31,7 +31,7 @@ from pdbfixer import PDBFixer
 
 from abhack.phscore import _apo, _propka
 
-ANTIGEN = ("C", "D")
+ANTIGEN = ("C", "D")  # override per structure with --antigen
 
 
 def his_states(pdb: Path, ph: float, rng: random.Random) -> tuple[dict, dict]:
@@ -60,8 +60,11 @@ def main() -> None:
     p.add_argument("--temp", type=float, default=310)
     p.add_argument("--equil-ps", type=float, default=100)
     p.add_argument("--platform", default="CUDA")
+    p.add_argument("--antigen", default="C,D", help="comma-separated antigen chain ids")
     a = p.parse_args()
 
+    global ANTIGEN
+    ANTIGEN = tuple(a.antigen.split(","))
     os.makedirs(os.path.dirname(os.path.abspath(a.out)) or ".", exist_ok=True)
     rng = random.Random(f"{a.seed}-{a.ph}")
     states, pkas = his_states(Path(a.pdb), a.ph, rng)
@@ -128,7 +131,7 @@ def main() -> None:
     t0 = time.time()
     sim.step(int(a.ns * 1e6 / dt))
     meta = {
-        "pdb": os.path.abspath(a.pdb), "ph": a.ph, "seed": a.seed, "ns": a.ns, "temp_K": a.temp,
+        "pdb": os.path.abspath(a.pdb), "antigen": list(ANTIGEN), "ph": a.ph, "seed": a.seed, "ns": a.ns, "temp_K": a.temp,
         "his_states": {f"{c}{n}": s for (c, n), s in states.items()},
         "his_pka_bound": {f"{c}{n}": v for (c, n), v in pkas.items()},
         "n_her2_ca_restrained": n_restr, "forcefield": "amber14-all + tip3p",

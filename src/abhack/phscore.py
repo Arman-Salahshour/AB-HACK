@@ -9,7 +9,7 @@ association constant at a given pH:
 
 so the predicted preference for tumour pH over plasma pH is
 
-    selectivity = log10 K(pH_low) - log10 K(pH_high)          (default 6.8 vs 7.2)
+    selectivity = log10 K(pH_low) - log10 K(pH_high)          (default 6.5 vs 7.4)
 
 Positive means the complex binds better at the lower pH. A trastuzumab control gives
 the noise floor. Propka is an empirical, static-structure predictor (errors of about
@@ -36,7 +36,7 @@ from openmm.app import PDBFile
 from abhack.constants import TRASTUZUMAB_VH, TRASTUZUMAB_VL
 from abhack.epitope import REFERENCE_CIF
 
-PH_LOW, PH_HIGH = 6.8, 7.2
+PH_LOW, PH_HIGH = 6.5, 7.4  # tumour microenvironment vs plasma/heart
 THREE = {
     "A": "ALA", "R": "ARG", "N": "ASN", "D": "ASP", "C": "CYS", "Q": "GLN", "E": "GLU",
     "G": "GLY", "H": "HIS", "I": "ILE", "L": "LEU", "K": "LYS", "M": "MET", "F": "PHE",
@@ -118,7 +118,14 @@ def selectivity(bound: dict, free: dict, ph_low: float = PH_LOW, ph_high: float 
     return {"log10_sel": total, "fold_sel": 10.0**total, "top_groups": parts[:6]}
 
 
-def score_variant(vh: str, vl: str, ph_low: float = PH_LOW, ph_high: float = PH_HIGH, pdb: Path | None = None) -> dict:
+def score_variant(
+    vh: str,
+    vl: str,
+    ph_low: float = PH_LOW,
+    ph_high: float = PH_HIGH,
+    pdb: Path | None = None,
+    antigen: tuple[str, ...] = ("C", "D"),
+) -> dict:
     """Thread (or use ``pdb``) -> propka complex and free Fv -> selectivity."""
     with tempfile.TemporaryDirectory(prefix="phscore_") as d:
         wd = Path(d)
@@ -126,7 +133,7 @@ def score_variant(vh: str, vl: str, ph_low: float = PH_LOW, ph_high: float = PH_
         if pdb is not None:
             (wd / "cplx.pdb").write_text(Path(pdb).read_text())
             cplx = wd / "cplx.pdb"
-        apo = _apo(cplx, wd / "apo.pdb")
+        apo = _apo(cplx, wd / "apo.pdb", antigen)
         res = selectivity(_propka(cplx, wd), _propka(apo, wd), ph_low, ph_high)
     his = [(k, pf, pb) for k, pf, pb, _ in res["top_groups"] if k[2] == "HIS"]
     res["his_summary"] = ";".join(f"{k[0]}{k[1]}:{pf}->{pb}" for k, pf, pb in his)

@@ -253,7 +253,68 @@ redesigned loop is modulating an interface it did not create.
 They are the ones where the model is as confident about the new loop as about the
 clinically validated framework around it.
 
-## 7. Head to head: seed 11 vs seed 21 best
+## 7. Thermostability
+
+**This is a judged axis and we cannot predict it.** No Tm predictor is available: Nebius's
+`ctoxpred2` and `admet-ai` are small-molecule tools, `stab-ddg` predicts *binding* ΔΔG,
+and DeepSTABp/TemStaPro are not installed. What follows is a ranking on features the
+literature ties to antibody Tm, not a temperature.
+
+### What the literature says determines antibody Tm
+
+- **CDR composition matters a great deal.** Swapping CDRs between single-domain
+  antibodies moved Tm across a 35 °C range (85 °C, 60 °C, 50 °C for the three frameworks),
+  and the authors conclude CDR interactions play a major role in stability
+  (Zabetakis et al., *PLoS One* 2013, [PMID 24143255](https://pubmed.ncbi.nlm.nih.gov/24143255/)).
+  So our CDRH3 change *can* move Tm — in either direction.
+- **Fab melting proceeds by VH–VL separation.** MD across 16 Fabs found the free-energy
+  minimum depth of the VH–VL bound state correlates with measured Tm
+  (Pomarici et al., *JCAMD* 2023, [PMID 36918473](https://pubmed.ncbi.nlm.nih.gov/36918473/)).
+  That makes VH–VL interface contacts a defensible structural proxy.
+- **Framework mutations are a proven lever, on trastuzumab specifically.** Rational FW
+  designs distal to the CDRs stabilised trastuzumab while preserving HER2 binding and
+  ADCC — and the same work found antibody language models gave poor guidance on FW
+  mutagenesis compared with structure-based approaches
+  (Ng et al., *mAbs* 2025, [PMID 40653772](https://pubmed.ncbi.nlm.nih.gov/40653772/)).
+- **Germlining the VH raised Fab Tm by >11 °C** in one case
+  (Luo et al., *JMB* 2010, [PMID 20727359](https://pubmed.ncbi.nlm.nih.gov/20727359/)).
+- **Loop prolines act position-dependently**; one substitution raised Tm and reduced
+  pH-stress aggregation (Kawakami et al., *BBRC* 2026, [PMID 42480179](https://pubmed.ncbi.nlm.nih.gov/42480179/)).
+
+### Computed: VH–VL interface and loop composition
+
+`designs/s21-thermostability-features.csv`, 40 designs plus the 1N8Z reference.
+
+| Design | CDRH3 | VH–VL contacts | from CDRH3 | intra-VH salt bridges | Gly | Pro | aromatic |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| *trastuzumab (1N8Z)* | WGGDGFYAMD | **87** | 27 | **11** | 3 | 0 | 3 |
+| `s21_10` | WNYAYDYAMD | **92** | 38 | 10 | 0 | 0 | 4 |
+| `s21_16` | WVASGYYAHD | 91 | 36 | 10 | 1 | 0 | 3 |
+| `s21_39` | SLSSTDFAFD | 91 | 36 | **11** | 0 | 0 | 2 |
+| `s21_28` | WASHYDYYFD | 89 | 33 | 10 | 0 | 0 | 5 |
+| `s21_4` | YASLYEYYFD | 89 | 35 | 9 | 0 | 0 | 5 |
+
+Across 40 designs VH–VL contacts span **77–92** against trastuzumab's **87**. Roughly a
+third sit above the parent.
+
+**Two observations that favour the designs.** Nearly all have **fewer glycines** in CDRH3
+than trastuzumab's three — trastuzumab's loop is `WGGDGFYAMD`, unusually glycine-rich, and
+glycine adds backbone flexibility. And most contribute **more CDRH3 contacts to the VH–VL
+interface** (33–38 vs 27), which by Pomarici's mechanism should resist the separation that
+initiates melting.
+
+**The honest caveat.** These are correlates, not a prediction, and the direction is
+untested: a loop making more VH–VL contacts might equally be strained. A design could be
+worse than trastuzumab on Tm and nothing here would show it. Treat this as a tiebreak
+among designs already selected on binding, not as evidence for the thermostability axis.
+
+**The lever we are not using.** Ng et al. stabilised trastuzumab by framework mutations
+distal to the CDRs, preserving binding and effector function. Since `abguard` inspects only
+CDRH3, such mutations are free against the novelty gate. We identified this early and did
+not execute it — it is the single clearest route to the thermostability axis, and it needs
+GPU time we spent on epitope steering instead.
+
+## 8. Head to head: seed 11 vs seed 21 best
 
 Every test applied to the same three molecules, with trastuzumab as reference.
 Source: `designs/head-to-head.csv`.
@@ -315,7 +376,7 @@ No single design dominates. The three are different bets:
 Submit all three near the top. The disagreement between them is information, not noise:
 if the measured-data model is right, D53 binds; if structure is right, D03 does.
 
-## 8. Recommendation
+## 9. Recommendation
 
 **If ranking on developability alone**, the picks change:
 
@@ -351,4 +412,16 @@ gate does not inspect.
 - Alam et al., *Mol Pharm* 2019 — [Deamidation and colloidal stability, pH-dependent](https://pubmed.ncbi.nlm.nih.gov/30916563/)
 - Pavon et al., *Anal Chem* 2019 — [Selective Trp oxidation of mAbs](https://pubmed.ncbi.nlm.nih.gov/30608647/)
 - Lenka et al., *mAbs* 2026 — [Local electrostatics governs Trp oxidation; distal mutations reduce it](https://pubmed.ncbi.nlm.nih.gov/42590841/)
+- Zabetakis et al., *PLoS One* 2013 — [CDR contributions to single-domain antibody thermal stability](https://pubmed.ncbi.nlm.nih.gov/24143255/)
+- Pomarici et al., *JCAMD* 2023 — [Fab dissociation as a measure of interface stability](https://pubmed.ncbi.nlm.nih.gov/36918473/)
+- Ng et al., *mAbs* 2025 — [Tuning trastuzumab stability by framework mutations](https://pubmed.ncbi.nlm.nih.gov/40653772/)
+- Luo et al., *JMB* 2010 — [Coevolution of antibody stability and CDR-L3 canonical structure](https://pubmed.ncbi.nlm.nih.gov/20727359/)
+- Kawakami et al., *BBRC* 2026 — [Position-dependent effects of loop prolines on Fab stability](https://pubmed.ncbi.nlm.nih.gov/42480179/)
 - FDA/EMA labels via AMASS RegulatoryCore: Ontruzant, Kanjinti, Trazimera, Herzuma, Kadcyla
+
+**On computational immunogenicity prediction.** Tools in this class have limited validated
+predictive power; see the FASEB review on the validity of computational immunogenicity
+prediction for therapeutic proteins
+([FASEB J 2008;22:563](https://faseb.onlinelibrary.wiley.com/doi/10.1096/fasebj.22.2_supplement.563)).
+This is why section 5 reports the parent's *measured* anti-drug antibody rate rather than a
+predicted immunogenicity score for our designs.

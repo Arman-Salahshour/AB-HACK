@@ -57,6 +57,10 @@ COMPONENTS: tuple[tuple[str, bool, float], ...] = (
     ("thermal_score", True, 1.0),
     ("af2ig_ipae", False, 1.0),
     ("af2ig_iptm", True, 1.0),
+    # pH selectivity, log10 K(6.5)/K(7.4) from propka proton linkage (abhack.phscore); positive = binds better
+    # in tumour-pH. Only present when --ph-scores is given; absent columns are skipped, not zeroed.
+    ("ph_log10_sel", True, 1.0),
+    ("ph_md_dq", True, 0.5),
 )
 
 
@@ -202,7 +206,26 @@ def add_thermal_scores(
     return out
 
 
+def add_ph_scores(df: pl.DataFrame, ph_scores: Path | str, ph_md: Path | str | None = None) -> pl.DataFrame:
+    """Join pH selectivity by design_id. Optional MD summary adds dQ = Q(6.5) - Q(7.4)."""
+    ph = pl.read_csv(ph_scores, infer_schema_length=10_000)
+    if "design_id" not in ph.columns or "ph_log10_sel" not in ph.columns:
+        raise ValueError("pH scores need design_id and ph_log10_sel columns")
+    if ph["design_id"].n_unique() != ph.height:
+        raise ValueError("pH scores contain duplicate design_id values")
+    out = df.join(ph.select("design_id", "ph_log10_sel"), on="design_id", how="left")
+    if ph_md is not None:
+        md = pl.read_csv(ph_md, infer_schema_length=10_000)
+        piv = (md.group_by("design", "ph").agg(pl.col("q_interface").mean())
+                 .pivot(on="ph", index="design", values="q_interface"))
+        if {"6.5", "7.4"} <= {str(c) for c in piv.columns}:
+            piv = piv.select(pl.col("design").alias("design_id"), (pl.col("6.5") - pl.col("7.4")).alias("ph_md_dq"))
+            out = out.join(piv, on="design_id", how="left")
+    return out
+
+
 def rank_table(tables: list[Path | str], *, max_ipae: float | None = IPAE_GATE,
+               ph_scores: Path | str | None = None, ph_md: Path | str | None = None,
                thermal_results: Path | str | None = None,
                thermal_control: Path | str | None = None,
                require_thermal: bool = False) -> pl.DataFrame:
@@ -218,6 +241,8 @@ def rank_table(tables: list[Path | str], *, max_ipae: float | None = IPAE_GATE,
         df = add_thermal_scores(df, thermal_results, thermal_control, require=require_thermal)
     elif require_thermal:
         raise ValueError("--require-thermal requires --thermal-results")
+    if ph_scores:
+        df = add_ph_scores(df, ph_scores, ph_md)
     return composite_score(df)
 
 
@@ -282,6 +307,9 @@ def main() -> None:  # pragma: no cover - thin CLI
     r.add_argument("--thermal-control", help="310 K thermal_control.csv")
     r.add_argument("--require-thermal", action="store_true", help="reject missing MD or failed 310 K controls")
 
+    r.add_argument("--ph-scores", help="designs/ph-*.csv with design_id, ph_log10_sel (6.5 vs 7.4)")
+    r.add_argument("--ph-md", help="runs/phmd/ph_md_summary.csv from scripts/analyze_ph_md.py")
+
     m = sub.add_parser("merge", help="quota-merge two ranked tables")
     m.add_argument("opt")
     m.add_argument("denovo")
@@ -294,6 +322,8 @@ def main() -> None:  # pragma: no cover - thin CLI
         df = rank_table(
             args.tables,
             max_ipae=None if args.no_ipae_gate else args.max_ipae,
+            ph_scores=args.ph_scores,
+            ph_md=args.ph_md,
             thermal_results=args.thermal_results,
             thermal_control=args.thermal_control,
             require_thermal=args.require_thermal,

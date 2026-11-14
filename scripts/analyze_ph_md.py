@@ -28,6 +28,7 @@ ANTIGEN = ("C", "D")
 
 def analyse(stem: str) -> dict:
     meta = json.load(open(f"{stem}.json"))
+    ANTIGEN = tuple(meta.get("antigen", ["C", "D"]))
     traj = md.load(f"{stem}.dcd", top=f"{stem}_top.pdb")
     top = traj.topology
     fv = [a.index for a in top.atoms if a.residue.chain.chain_id not in ANTIGEN and a.element.symbol != "H"]
