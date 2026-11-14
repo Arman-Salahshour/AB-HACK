@@ -36,7 +36,7 @@ def sh(cmd: list[str] | str, **kw) -> int:
     """Run a shell step, streaming output; returns the exit code."""
     printable = cmd if isinstance(cmd, str) else " ".join(cmd)
     print(f"$ {printable}", flush=True)
-    return subprocess.run(cmd, shell=isinstance(cmd, str), cwd=ROOT, **kw).returncode
+    return subprocess.run(cmd, shell=isinstance(cmd, str), cwd=ROOT, check=False, **kw).returncode
 
 
 # --------------------------------------------------------------------------- generate
@@ -110,7 +110,7 @@ def validate(run: str, out: str | None = None) -> dict:
     df = df.join(epi, on="design_id", how="left")
     df.write_csv(table)
 
-    passing = df.filter(pl.col("passes") == True)  # noqa: E712
+    passing = df.filter(pl.col("passes") == True)
     unique = passing.unique(subset=["cdrh3"], keep="first")
 
     from abhack.submission import to_submission
@@ -119,7 +119,7 @@ def validate(run: str, out: str | None = None) -> dict:
     to_submission(unique, kind="paired").write_csv(sub_path)
     verdict = subprocess.run(["bash", "scripts/validate.sh", str(sub_path), "--drop",
                               "-o", f"designs/{tag}-valid.csv"],
-                             cwd=ROOT, capture_output=True, text=True)
+                             cwd=ROOT, capture_output=True, text=True, check=False)
     valid = 0
     for line in (verdict.stdout + verdict.stderr).splitlines():
         if "design(s) valid" in line:
@@ -166,7 +166,7 @@ def finalise(runs: list[str], limit: int, out: str) -> pl.DataFrame:
         raise SystemExit("nothing to finalise")
 
     df = pl.concat(frames, how="diagonal_relaxed")
-    df = df.filter(pl.col("passes") == True)  # noqa: E712
+    df = df.filter(pl.col("passes") == True)
     df = df.unique(subset=["cdrh3"], keep="first")
 
     if "min_ipae_boltz2" in df.columns:
