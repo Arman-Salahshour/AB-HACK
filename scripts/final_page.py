@@ -13,7 +13,7 @@ from pathlib import Path
 import polars as pl
 
 OUT = Path("docs/final-ranking.html")
-SRC_CSS = Path("/tmp/claude-1001/-home-hackathon/bfddba5e-cb2f-4f81-a0cb-929d3a8291b0/scratchpad/pipeline-share.html")
+SRC_CSS = Path(__file__).resolve().parent.parent / "docs" / "pipeline.html"  # base stylesheet (first <style> block)
 
 
 def css() -> str:

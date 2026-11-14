@@ -18,7 +18,7 @@ from pathlib import Path
 import polars as pl
 
 HERE = Path(__file__).parent
-WEB = Path("/tmp/claude-1001/-home-hackathon/bfddba5e-cb2f-4f81-a0cb-929d3a8291b0/scratchpad/deck/web")
+WEB = HERE.parent / "docs" / "assets" / "odyssey"  # the deck's illustrations, downscaled for embedding
 
 
 def load(name: str):
@@ -214,7 +214,7 @@ def main() -> None:
         <thead><tr><th>Question</th><th>What we have</th><th>How far to trust it</th></tr></thead>
         <tbody>
           <tr><td>Affinity</td><td>Binder and K<sub>D</sub> models trained on 525k measured variants; Boltz-2 interface error</td>
-            <td>Predictions only. Our best design is predicted about 27&times; weaker than trastuzumab, so we do not expect to win on affinity.</td></tr>
+            <td>Predictions only. Our best design is predicted at about 9 nM against trastuzumab's 0.2 nM, roughly 40&times; weaker, so we do not expect to win on affinity.</td></tr>
           <tr><td>Thermostability</td><td>Framework twins from the literature; a loop-confidence proxy; thermal MD on trastuzumab only</td>
             <td>No design was simulated, because the MD was stopped early. The twins are the real bet.</td></tr>
           <tr><td>pH 6.5 versus 7.4</td><td>A pKa-based prediction for every design; two-pH MD on the reference</td>
