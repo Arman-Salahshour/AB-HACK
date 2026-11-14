@@ -8,6 +8,12 @@ candidates and provenance. Every quality claim belongs to the evaluator, which
 uses a model that never saw the designed structure. See
 [`evaluator.md`](evaluator.md).
 
+> **Why the roles are split — this is the measured part.** 100 de novo designs scored
+> **100/100** on this generator's own hotspot-obedience metric, and **0 of 20 survived**
+> independent refolding. A generator that also grades its output has no structural reason
+> to reject it. The prohibition below — you may not claim a design binds — is what that
+> failure bought, and it is the architectural contribution of this project.
+
 ---
 
 ## Input

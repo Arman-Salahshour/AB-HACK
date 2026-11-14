@@ -8,6 +8,12 @@ evaluator's job is to find the designs that survive a model which never saw the
 designed structure — and to report the attrition honestly, including when the
 answer is "none of them". See [`generator.md`](generator.md).
 
+> **Why an adversarial evaluator earns its cost.** Reporting 0/40 at 12:45 freed three
+> hours of GPU already committed to a configuration that does not work, and redirected
+> them to the track that produced every submitted design. The value of this role is
+> concentrated in the null results it delivers early — not in the rankings it produces
+> when everything passes.
+
 ---
 
 ## Input

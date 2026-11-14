@@ -1,5 +1,19 @@
 # Developability benchmark — seed 21 candidates
 
+> **What is new here.** Two things.
+>
+> **The parent is used as a positive control, and the models pass it.** Run on
+> trastuzumab's own CDRH3, our classifier returns 0.995 and our regressor 0.22 nM against
+> a measured 0.029–0.178 nM. That calibration is what licenses reading the rest of the
+> column — and what makes the conclusion credible rather than convenient: no design we
+> produced approaches the parent on affinity.
+>
+> **Every unmeasurable axis is named as unmeasured.** Thermostability, toxicity,
+> immunogenicity and solubility are reported as proxies with their mechanism of failure
+> stated, not as scores. Section 7 ranks thermostability on VH–VL interface contacts
+> because Fab melting proceeds by VH–VL separation — and says plainly that a design could
+> be worse than trastuzumab without this showing it.
+
 Twelve top designs from the epitope-steered run, against trastuzumab as the reference.
 Computed metrics from `abguard` (LAP liability reference) and Biopython ProtParam;
 interpretation grounded in the literature and FDA/EMA labels via AMASS.

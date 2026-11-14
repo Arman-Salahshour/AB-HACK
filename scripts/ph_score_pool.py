@@ -41,10 +41,10 @@ def _lookup(did: str) -> str | None:
     return hit[0] if hit else None
 
 
-def _work(item: tuple[str, str | None]) -> dict:
-    did, cif = item
+def _work(item: tuple[str, str, str, str | None]) -> dict:
+    did, vh, vl, cif = item
     cif = cif or _lookup(did.removesuffix("-ft"))
-    out = {"design_id": did, "ph_log10_sel": None, "ph_his_summary": "", "ph_top_groups": "", "ph_error": ""}
+    out = {"design_id": did, "vh_sequence": vh, "vl_sequence": vl, "ph_log10_sel": None, "ph_his_summary": "", "ph_top_groups": "", "ph_error": ""}
     if not cif or not Path(cif).exists():
         out["ph_error"] = "no structure"
         return out
@@ -68,14 +68,16 @@ def main() -> None:
     ap.add_argument("-o", "--out", default="designs/ph-scores.csv")
     ap.add_argument("-j", type=int, default=12)
     a = ap.parse_args()
-    items: dict[str, str | None] = {}
+    # design_id repeats across runs (her2_cdrh3_28 exists in several), so the key is the sequence pair.
+    items: dict[tuple[str, str], tuple] = {}
     for t in a.tables:
         df = pl.read_csv(t, infer_schema_length=10_000)
         cif = df["cif"] if "cif" in df.columns else pl.Series([None] * df.height)
-        for did, c in zip(df["design_id"], cif, strict=True):
-            items.setdefault(did, c)
+        vl = df["vl_sequence"] if "vl_sequence" in df.columns else pl.Series([None] * df.height)
+        for did, vh_, vl_, c in zip(df["design_id"], df["vh_sequence"], vl, cif, strict=True):
+            items.setdefault((vh_ or "", vl_ or ""), (did, vh_ or "", vl_ or "", c))
     with Pool(a.j) as p:
-        rows = p.map(_work, list(items.items()), chunksize=4)
+        rows = p.map(_work, list(items.values()), chunksize=4)
     out = pl.DataFrame(rows, infer_schema_length=None)
     out.write_csv(a.out)
     ok = out.filter(pl.col("ph_log10_sel").is_not_null())

@@ -233,11 +233,24 @@ def add_ph_scores(df: pl.DataFrame, ph_scores: Path | str, ph_md: Path | str | N
     :data:`PH_MD_SIGMAS` control spreads in the same direction. One signal alone earns nothing.
     """
     ph = pl.read_csv(ph_scores, infer_schema_length=10_000)
-    if "design_id" not in ph.columns or "ph_log10_sel" not in ph.columns:
-        raise ValueError("pH scores need design_id and ph_log10_sel columns")
-    if ph["design_id"].n_unique() != ph.height:
-        raise ValueError("pH scores contain duplicate design_id values")
-    out = df.join(ph.select("design_id", "ph_log10_sel"), on="design_id", how="left")
+    if "ph_log10_sel" not in ph.columns:
+        raise ValueError("pH scores need a ph_log10_sel column")
+    seq = {"vh_sequence", "vl_sequence"}
+    if seq <= set(ph.columns) and "vh_sequence" in df.columns:
+        # design_id repeats across runs, so join on the sequence pair; a missing VL (VHH) is "".
+        # temporary key columns, so the caller's own vh/vl values (null for a VHH) are left untouched
+        key = lambda d: d.with_columns(  # noqa: E731
+            _k_vh=pl.col("vh_sequence").cast(pl.String).fill_null(""),
+            _k_vl=(pl.col("vl_sequence").cast(pl.String).fill_null("") if "vl_sequence" in d.columns else pl.lit("")),
+        )
+        right = key(ph).select("_k_vh", "_k_vl", "ph_log10_sel").unique(subset=["_k_vh", "_k_vl"])
+        out = key(df).join(right, on=["_k_vh", "_k_vl"], how="left").drop("_k_vh", "_k_vl")
+    else:
+        if "design_id" not in ph.columns:
+            raise ValueError("pH scores need design_id or (vh_sequence, vl_sequence)")
+        if ph["design_id"].n_unique() != ph.height:
+            raise ValueError("pH scores contain duplicate design_id values")
+        out = df.join(ph.select("design_id", "ph_log10_sel"), on="design_id", how="left")
     credit = pl.lit(0.0)
     if ph_md is not None:
         md = pl.read_csv(ph_md, infer_schema_length=10_000)

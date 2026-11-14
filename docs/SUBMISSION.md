@@ -1,5 +1,12 @@
 # Final submission — 20 designs
 
+> **What is new here.** The ranking disagreement is published rather than resolved. This
+> order weights structural evidence first, but the FACS classifier — trained on 524,346
+> measured variants and calibrated against the parent at 0.995 — puts designs 20 and 16 on
+> top instead. Both orderings are defensible and they select different molecules. Stating
+> that lets whoever presents this choose deliberately, and lets the experimental result
+> adjudicate between two recorded predictions rather than one.
+
 All 20 pass every `abguard` filter (format, length, cysteines, IMGT numbering, novelty
 against a 610k CDRH3 reference). Ranked on structure reproduction, then epitope
 engagement, then interface confidence.

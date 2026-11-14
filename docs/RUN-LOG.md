@@ -1,5 +1,12 @@
 # Run log — Oslo Antibodies × AI, 14 November 2026
 
+> **What is new here.** Most design write-ups report the batch that worked. This one
+> reports the batch that did not, and when. The de novo track was killed at 12:45 by
+> three independent methods agreeing on 0/40, and the three batches already queued
+> behind it were cancelled. The timeline below is kept so that the *cost of finding out
+> late* is visible: we queued 400 designs before the first validation returned. That
+> ordering mistake, not the null result, is the transferable lesson.
+
 What was built, what was run, what it produced, and why each decision was made.
 Times are UTC on the hackathon VM (1× H100, 16 vCPU, 196 GB).
 

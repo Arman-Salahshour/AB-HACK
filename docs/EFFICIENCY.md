@@ -1,5 +1,19 @@
 # Making the pipeline more efficient
 
+> **What is new here.** Two measured findings, both counter to how the pipeline is
+> normally run.
+>
+> **1. The expensive filter does not discriminate.** Refolding costs 14 s per design and
+> spans 0.292–0.344 in `min_ipae` across our final 20. The FACS classifier costs ~1 ms
+> and spans 0.034–0.883 — a 26× wider range on the axis that matters. We were spending
+> GPU on the measurement that cannot rank, then ranking with the one that is free.
+>
+> **2. A filter's value is its rejection rate.** Seed 21 returned 30 strong refolds out
+> of 30. That is nine minutes of GPU buying zero bits of ranking information. The same
+> filter on the de novo track returned 0/40 and was decisive. We propose tracking pass
+> rate as a live control signal: above ~80 %, shrink the validation set; below ~20 %, stop
+> generating and fix the configuration.
+
 Measured on the hackathon VM (1× H100), 14 November 2026. Every number below comes from a
 run in `runs/`, not from documentation.
 

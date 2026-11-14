@@ -62,3 +62,11 @@ abrun() {
 }
 
 export -f rfd4_image fold_image fold_has_template abrun 2>/dev/null || true
+
+# --- AMASS (biomedical literature & regulatory search) -----------------------
+export AMASS_API_KEY="***REMOVED***"
+export AMASS_BASE_URL="https://api.amass.tech/api/v1"
+
+# --- JapanFold (structure prediction & binder design) ------------------------
+export JAPANFOLD_API_KEY="***REMOVED***"
+export JAPANFOLD_BASE_URL="https://api.japanfold.aiand.com"

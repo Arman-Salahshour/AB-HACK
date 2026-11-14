@@ -1,5 +1,12 @@
 # Tools used
 
+> **What is new here.** The second half of this document — the seven tools we could *not*
+> run — is the part worth reading. ProteinMPNN was sandbox-blocked, Aggrescan3D is Python 2,
+> NetSolP and SoluProt are not installable, FoldX and NetMHCIIpan are licensed, and
+> Nebius's `stab-ddg` needs upload tooling missing from the provided folder. Those gaps are
+> why thermostability, toxicity, immunogenicity and solubility are **not predicted** in this
+> work. A benchmark that lists only the tools that ran overstates what it knows.
+
 Every tool that produced a number in this project, what it was used for, where it ran,
 and what it cannot tell you. Tools we tried and could not use are listed too, because the
 gaps matter when reading the results.
