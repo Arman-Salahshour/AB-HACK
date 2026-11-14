@@ -175,7 +175,69 @@ Two caveats follow from that same fact:
 
 ---
 
-## 6. Recommendation
+## 6. Head to head: seed 11 vs seed 21 best
+
+Every test applied to the same three molecules, with trastuzumab as reference.
+Source: `designs/head-to-head.csv`.
+
+| Test | trastuzumab | D53 (seed 11) | D03 (seed 21) | D04 (seed 21) |
+| --- | --- | --- | --- | --- |
+| CDRH3 | WGGDGFYAMD | WTSSVGYAHD | WASSYYYYFD | YASSYDYYFD |
+| **Structure** | | | | |
+| `min_ipae` | – | 0.475 | **0.314** | 0.328 |
+| `iptm` | – | 0.777 | **0.967** | 0.962 |
+| backbone RMSD | – | 0.824 Å | **0.704 Å** | 0.781 Å |
+| binder pLDDT | – | 97.6 | **98.2** | 97.9 |
+| **Epitope** | | | | |
+| contacts | – | 15/17 | **20** | 19 |
+| precision | – | 0.88 | **1.00** | **1.00** |
+| **Binding (measured-data models)** | | | | |
+| P(high binder) | **0.995** | **0.780** | 0.454 | 0.419 |
+| predicted K_D | **0.22 nM** | 22.2 nM | **5.9 nM** | 51.7 nM |
+| **Developability** | | | | |
+| liabilities, total | 8 | 7 | 6 | **5** |
+| high severity | 3 | 2 | 2 | **2** |
+| in CDRH3 | 3 | 2 | 1 | **0** |
+| instability index | 40.7 | **38.3** | 40.5 | 39.3 |
+| pI | 8.61 | 8.82 | 8.79 | 8.59 |
+| charge at pH 5.5 | +5.4 | +7.1 | +6.3 | +5.4 |
+| GRAVY | −0.334 | −0.342 | −0.346 | **−0.358** |
+| CDR positive charge | 2 | 2 | 2 | 2 |
+| glycosylation sequons | 0 | 0 | 0 | 0 |
+
+### Reading it
+
+**Steering won on structure and epitope, decisively.** D03 beats D53 on every structural
+measure — `iptm` +24 %, RMSD −15 %, `min_ipae` −34 % — and reaches perfect epitope
+precision. That improvement came entirely from replacing 4 hotspot atoms with the
+17-residue measured epitope.
+
+**D53 still wins on the binding model that matters most.** P(high) 0.780 against D03's
+0.454 — and that model is trained on 524,000 measured variants, with the parent as a
+passing positive control (0.995). The two models disagree with each other too: D03 has
+the better predicted K_D (5.9 vs 22.2 nM) but the worse P(high).
+
+**Developability improves monotonically across the three**: 8 → 7 → 6 → 5 liabilities,
+3 → 2 → 1 → 0 in CDRH3. D04 is the cleanest molecule we have and the only one with no
+CDRH3 liability at all, at the cost of ~9× predicted affinity against D03.
+
+**Nothing approaches trastuzumab on affinity.** The parent is 27× tighter than our best
+predicted design and has P(high) 0.995. Every design is also *cleaner* than the parent on
+liabilities — the parent carries 3 high-severity flags and 3 in CDRH3 — so the trade we
+are making is affinity for developability, in the wrong direction for S-tier.
+
+### Which to submit
+
+No single design dominates. The three are different bets:
+
+- **D03** — best structure and epitope, best predicted affinity, one Trp flag
+- **D53** — best binding probability, independent OpenDDE-abag confirmation at ipTM 0.951
+- **D04** — cleanest developability, no CDRH3 liability, weakest affinity
+
+Submit all three near the top. The disagreement between them is information, not noise:
+if the measured-data model is right, D53 binds; if structure is right, D03 does.
+
+## 7. Recommendation
 
 **If ranking on developability alone**, the picks change:
 
