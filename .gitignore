@@ -14,6 +14,10 @@ dist/
 .coverage
 htmlcov/
 
+# Claude Code: the agent definitions are project config and are tracked;
+# per-machine settings and approvals are not.
+.claude/settings.local.json
+
 # editor / OS litter
 .DS_Store
 __MACOSX/
