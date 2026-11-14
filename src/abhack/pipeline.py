@@ -167,18 +167,18 @@ def finalise(runs: list[str], limit: int, out: str) -> pl.DataFrame:
 
     df = pl.concat(frames, how="diagonal_relaxed")
     df = df.filter(pl.col("passes") == True)
-    df = df.unique(subset=["cdrh3"], keep="first")
 
     if "min_ipae_boltz2" in df.columns:
         df = df.filter(pl.col("min_ipae_boltz2").is_not_null())
 
-    # Rank: reproducible structure first, then interface, then epitope engagement.
+    # Rank first, then dedupe: the same loop can be sampled more than once with
+    # different poses, and the best-posed sample is the one to keep.
     df = df.with_columns(
         reproduced=(pl.col("backbone_rmsd_boltz2") < STRONG["backbone_rmsd"]).fill_null(False)
     ).sort(
         ["reproduced", "n_epitope", "min_ipae_boltz2"],
         descending=[True, True, False], nulls_last=True,
-    ).head(limit)
+    ).unique(subset=["cdrh3"], keep="first", maintain_order=True).head(limit)
 
     Path(out).parent.mkdir(parents=True, exist_ok=True)
     df.write_csv(out)
